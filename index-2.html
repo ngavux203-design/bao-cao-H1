@@ -72,9 +72,26 @@
         }
     </style>
 </head>
-<body class="overflow-x-hidden antialiased">
+<body class="overflow-x-hidden antialiased flex flex-col min-h-screen">
 
-    <div class="flex flex-col lg:flex-row min-h-screen">
+    <!-- THANH ĐIỀU HƯỚNG HỆ THỐNG BÁO CÁO -->
+    <div class="bg-brand-darkNavy text-white py-3 px-4 sm:px-6 shadow-md flex flex-col sm:flex-row justify-between items-center gap-3 text-xs md:text-sm border-b border-slate-800 z-10">
+        <div class="flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+            <span class="font-bold tracking-wide text-slate-200 uppercase">Hệ Thống Phân Tích Đào Tạo KiotViet</span>
+        </div>
+        <div class="flex gap-2 bg-slate-800/60 p-1 rounded-lg">
+            <a href="index.html" class="px-3 py-1.5 rounded-md hover:text-white text-slate-400 font-medium transition">
+                📈 Kiểu 1: Báo cáo Tĩnh
+            </a>
+            <a href="index-2.html" class="px-3 py-1.5 rounded-md bg-brand-navy text-white font-semibold transition">
+                💻 Kiểu 2: Dashboard Tương tác CSV
+            </a>
+        </div>
+    </div>
+
+    <!-- KHUNG GIAO DIỆN CHÍNH -->
+    <div class="flex flex-col lg:flex-row flex-grow">
         
         <!-- SIDEBAR (Uploader & Filters) -->
         <aside class="w-full lg:w-80 bg-brand-darkNavy text-slate-100 flex-shrink-0 p-6 flex flex-col justify-between shadow-xl">
