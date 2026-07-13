@@ -3,438 +3,355 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Báo Cáo Đào Tạo KiotViet</title>
-    <!-- Nhúng Tailwind CSS để tối ưu giao diện UI/UX phẳng, chuyên nghiệp -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Nhúng thư viện biểu đồ tương tác Plotly.js -->
-    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-</head>
-<body class="bg-slate-50 text-slate-800">
-
-    <!-- THANH ĐIỀU HƯỚNG HỆ THỐNG BÁO CÁO -->
-    <div class="bg-slate-900 text-white py-3 px-4 sm:px-6 shadow-md flex flex-col sm:flex-row justify-between items-center gap-3 text-xs md:text-sm">
-        <div class="flex items-center gap-2">
-            <span class="w-2.5 h-2.5 rounded-full bg-blue-500 animate-pulse"></span>
-            <span class="font-bold tracking-wide text-slate-200 uppercase">Hệ Thống Phân Tích Đào Tạo KiotViet</span>
-        </div>
-        <div class="flex gap-2 bg-slate-800 p-1 rounded-lg">
-            <a href="index.html" class="px-3 py-1.5 rounded-md bg-blue-800 text-white font-semibold transition">
-                📈 Kiểu 1: Báo cáo Tĩnh
-            </a>
-            <a href="index-2.html" class="px-3 py-1.5 rounded-md hover:text-white text-slate-300 font-medium transition">
-                💻 Kiểu 2: Dashboard Tương tác CSV
-            </a>
-        </div>
-    </div>
-
-    <!-- NỘI DUNG CHÍNH -->
-    <div class="max-w-7xl mx-auto p-4 sm:p-6">
-        <!-- TIÊU ĐỀ CHÍNH -->
-        <div class="bg-white rounded-xl p-6 shadow-sm border border-slate-200 mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-            <div>
-                <h1 class="text-2xl font-bold text-slate-900 flex items-center gap-2">
-                    <span class="text-3xl">📊</span> BÁO CÁO ĐÀO TẠO NHÂN SỰ MỚI & HIỆU SUẤT LMS
-                </h1>
-                <p class="text-sm text-slate-500 mt-1">Hệ thống phân tích quản trị quá trình Onboarding, Hiệu suất đào tạo trực tuyến LMS và Giảng viên nội bộ.</p>
-            </div>
-            <div class="flex gap-2">
-                <span class="px-3 py-1 bg-blue-100 text-blue-800 text-xs font-semibold rounded-full flex items-center">KiotViet Software Business</span>
-                <span class="px-3 py-1 bg-green-100 text-green-800 text-xs font-semibold rounded-full flex items-center">Cập nhật: 2026</span>
-            </div>
-        </div>
-
-        <!-- TABS ĐIỀU HƯỚNG (ĐÃ THÊM TAB 3) -->
-        <div class="flex border-b border-slate-200 mb-6">
-            <button id="tab1-btn" onclick="switchTab('tab1')" class="py-3 px-6 font-semibold text-sm border-b-2 border-blue-800 text-blue-800 focus:outline-none">
-                🎯 Tổng Quan Onboarding & Attrition
-            </button>
-            <button id="tab2-btn" onclick="switchTab('tab2')" class="py-3 px-6 font-medium text-sm text-slate-500 hover:text-slate-800 focus:outline-none">
-                💻 Hiệu Suất Hệ Thống LMS
-            </button>
-            <button id="tab3-btn" onclick="switchTab('tab3')" class="py-3 px-6 font-medium text-sm text-slate-500 hover:text-slate-800 focus:outline-none">
-                👥 Phân Tích Giảng Viên & Đứng Lớp
-            </button>
-        </div>
-
-        <!-- ========================================== -->
-        <!-- TAB 1: ONBOARDING & ATTRITION IN TRAINING -->
-        <!-- ========================================== -->
-        <div id="tab1" class="tab-content block">
-            <!-- THẺ KPI -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between">
-                    <div>
-                        <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Nhân sự mới Onboard</p>
-                        <p class="text-3xl font-bold text-blue-900 mt-2">465 <span class="text-sm font-normal text-slate-400">người</span></p>
-                    </div>
-                    <p class="text-xs text-slate-400 mt-3">Tham gia chương trình Đào tạo hội nhập mới</p>
-                </div>
-                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between">
-                    <div>
-                        <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Nghỉ việc trong đào tạo</p>
-                        <p class="text-3xl font-bold text-amber-600 mt-2">35 <span class="text-sm font-normal text-slate-400">người</span></p>
-                    </div>
-                    <p class="text-xs text-amber-600 font-medium mt-3">⚠️ Tỷ lệ Dropout: 7.53%</p>
-                </div>
-                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-                    <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Cơ cấu Chương trình Đào tạo (143 khóa)</p>
-                    <div class="grid grid-cols-2 gap-x-3 gap-y-1.5 text-xs text-slate-600 font-medium">
-                        <div>🎓 Chuyên môn: <span class="text-blue-900 font-bold">69</span></div>
-                        <div>🌸 Văn hóa: <span class="text-blue-900 font-bold">34</span></div>
-                        <div>💡 Kỹ năng: <span class="text-blue-900 font-bold">22</span></div>
-                        <div>⚙️ PTSP: <span class="text-blue-900 font-bold">16</span></div>
-                        <div class="col-span-2">👑 Leadership (Lãnh đạo): <span class="text-blue-900 font-bold">2</span></div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- BIỂU ĐỒ HÀNG 1 -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-                <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
-                    <h3 class="text-base font-bold text-slate-800 mb-4">Số lượng Nhân sự Mới Onboarding theo Tháng</h3>
-                    <div id="chart-onboarding-trend" class="h-80"></div>
-                </div>
-                <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
-                    <h3 class="text-base font-bold text-slate-800 mb-4">Tỷ Lệ Nghỉ Việc TRONG Thời Gian Đào Tạo theo Bộ Phận</h3>
-                    <div id="chart-attrition-training" class="h-80"></div>
-                </div>
-            </div>
-
-            <!-- ĐÁNH GIÁ CHUNG -->
-            <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
-                <h3 class="text-base font-bold text-slate-800 mb-3">Phân Tích Onboarding & Nghỉ Việc Trong Đào Tạo</h3>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-sm text-slate-600">
-                    <div class="bg-slate-50 p-4 rounded-lg">
-                        <p class="font-bold text-blue-900 mb-1">📌 dropout rate ổn định</p>
-                        Tỷ lệ nghỉ việc trung bình trong đào tạo là <strong>7.53%</strong>. Đây là mức biến động tương đối thấp trong giai đoạn học việc ban đầu, chứng minh chương trình đào tạo hấp dẫn và giữ chân tốt.
-                    </div>
-                    <div class="bg-slate-50 p-4 rounded-lg">
-                        <p class="font-bold text-blue-900 mb-1">📌 Rủi ro cao nhất ở khối DS</p>
-                        Khối <strong>Direct Sales (DS)</strong> ghi nhận tỷ lệ nghỉ trong đào tạo cao nhất với <strong>9.69%</strong> (25/258 người), cần xem xét lại lộ trình thực địa thực tế của khối này.
-                    </div>
-                    <div class="bg-slate-50 p-4 rounded-lg">
-                        <p class="font-bold text-blue-900 mb-1">📌 Khối Telesales (TS) thích nghi tốt</p>
-                        Khối <strong>Telesales (TS)</strong> có tỷ lệ nghỉ việc trong đào tạo ở mức khá an toàn là <strong>6.78%</strong> (8/118 người), cho thấy các bài kiểm tra thực hành kịch bản cuộc gọi (Call Script) phát huy tác dụng tốt.
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- ========================================== -->
-        <!-- TAB 2: LMS PERFORMANCE -->
-        <!-- ========================================== -->
-        <div id="tab2" class="tab-content hidden">
-            <!-- THẺ KPI LMS -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-                    <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Tổng lượt học trên LMS</p>
-                    <p class="text-2xl font-bold text-blue-900 mt-2">1,392 <span class="text-sm font-normal text-slate-400">lượt</span></p>
-                    <p class="text-xs text-slate-400 mt-1">Lượt đăng ký học E-Learning</p>
-                </div>
-                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-                    <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Số khóa học trên LMS</p>
-                    <p class="text-2xl font-bold text-emerald-600 mt-2">17 <span class="text-sm font-normal text-slate-400">khóa gốc</span></p>
-                    <p class="text-xs text-emerald-600 font-medium mt-1">Đã gộp từ 60 lớp học chi tiết</p>
-                </div>
-                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-                    <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Tỷ lệ hoàn thành LMS</p>
-                    <p class="text-2xl font-bold text-blue-900 mt-2">98.13%</p>
-                    <p class="text-xs text-slate-400 mt-1">1,366 lượt hoàn thành đạt yêu cầu</p>
-                </div>
-                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-                    <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Điểm kiểm tra trung bình</p>
-                    <p class="text-2xl font-bold text-blue-900 mt-2">93.8 <span class="text-sm font-normal text-slate-400">/ 100</span></p>
-                    <p class="text-xs text-slate-400 mt-1">Không tính các khóa chỉ điểm danh</p>
-                </div>
-            </div>
-
-            <!-- BIỂU ĐỒ TAB 2 -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
-                    <h3 class="text-base font-bold text-slate-800 mb-4">So Sánh Hình Thức: LMS vs Đào Tạo Trực Tiếp</h3>
-                    <div id="chart-lms-compare" class="h-80"></div>
-                </div>
-                <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
-                    <h3 class="text-base font-bold text-slate-800 mb-4">Phân Phối Điểm Số Bài Thi Trên LMS</h3>
-                    <div id="chart-lms-distribution" class="h-80"></div>
-                </div>
-            </div>
-
-            <!-- DANH SÁCH CHI TIẾT 17 KHÓA HỌC TRÊN LMS -->
-            <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm mt-6">
-                <h3 class="text-base font-bold text-slate-800 mb-1">Danh Sách 17 Chương Trình Đào Tạo Gốc Trên Hệ Thống LMS</h3>
-                <p class="text-xs text-slate-400 mb-4">Danh sách đã được làm sạch và chuẩn hóa (Gộp các lớp học như 26KV03, 26KV05 thành một khóa học gốc):</p>
-                <div class="overflow-y-auto max-h-60 border border-slate-200 rounded-lg">
-                    <table class="min-w-full divide-y divide-slate-200 text-sm">
-                        <thead class="bg-slate-100 sticky top-0">
-                            <tr>
-                                <th class="px-4 py-2 text-left font-bold text-slate-700 w-16">STT</th>
-                                <th class="px-4 py-2 text-left font-bold text-slate-700">Tên Chương Trình (Đã Gộp Lớp)</th>
-                                <th class="px-4 py-2 text-left font-bold text-slate-700 w-48">Phân Loại Module</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-slate-200" id="lms-table-body">
-                            <!-- JS tự động thêm danh sách khóa học vào đây -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-
-        <!-- ========================================== -->
-        <!-- TAB 3: INSTRUCTOR ANALYSIS (TAB MỚI) -->
-        <!-- ========================================== -->
-        <div id="tab3" class="tab-content hidden">
-            <!-- THẺ KPI GIẢNG VIÊN -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-                    <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Giảng viên nội bộ đứng lớp</p>
-                    <p class="text-2xl font-bold text-blue-900 mt-2">7 <span class="text-sm font-normal text-slate-400">giảng viên / nhóm</span></p>
-                    <p class="text-xs text-slate-400 mt-1">Đội ngũ nội bộ phụ trách đứng lớp trực tiếp</p>
-                </div>
-                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-                    <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Lượt học qua E-Learning (LMS)</p>
-                    <p class="text-2xl font-bold text-emerald-600 mt-2">1,392 <span class="text-sm font-normal text-slate-400">lượt học</span></p>
-                    <p class="text-xs text-emerald-600 font-medium mt-1">Chiếm 41.66% tổng lượng đào tạo</p>
-                </div>
-                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-                    <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Lượt học trực tiếp (ILT)</p>
-                    <p class="text-2xl font-bold text-blue-900 mt-2">1,949 <span class="text-sm font-normal text-slate-400">lượt học</span></p>
-                    <p class="text-xs text-slate-400 mt-1">Chiếm 58.34% lượng đào tạo do Giảng viên dạy</p>
-                </div>
-            </div>
-
-            <!-- BIỂU ĐỒ TAB 3 -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-                <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
-                    <h3 class="text-base font-bold text-slate-800 mb-4">Số lượng Lượt học viên đào tạo theo Giảng viên</h3>
-                    <div id="chart-instructor-share" class="h-80"></div>
-                </div>
-                <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between">
-                    <div>
-                        <h3 class="text-base font-bold text-slate-800 mb-2">Đánh Giá Hiệu Suất Đội Ngũ Giảng Viên</h3>
-                        <div class="text-sm text-slate-600 space-y-4 mt-4">
-                            <p>🌟 <strong>Nguyễn Lê Nhật Vi:</strong> Là giảng viên trực tiếp đào tạo lượng học viên lớn nhất với <strong>546 lượt học viên</strong> (phụ trách 15 chương trình chuyên môn quan trọng).</p>
-                            <p>🌟 <strong>Nguyễn Thị Thu Phương:</strong> Phụ trách số lượng khóa học đa dạng nhất toàn công ty với <strong>25 khóa học khác nhau</strong>, đào tạo 493 lượt học viên.</p>
-                            <p>🌟 <strong>Trần Linh Trang:</strong> Đóng vai trò quan trọng trong việc giảng dạy các lớp kỹ năng mấu chốt, trực tiếp giảng dạy 21 chương trình học với <strong>404 lượt học viên</strong>.</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- BẢNG CHI TIẾT GIẢNG VIÊN -->
-            <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
-                <h3 class="text-base font-bold text-slate-800 mb-3">Bảng Chi Tiết Chỉ Số Đứng Lớp Của Giảng Viên</h3>
-                <div class="overflow-x-auto rounded-lg border border-slate-200">
-                    <table class="min-w-full divide-y divide-slate-200 text-sm">
-                        <thead class="bg-slate-100">
-                            <tr>
-                                <th class="px-4 py-3 text-left font-bold text-slate-700">Tên Giảng Viên</th>
-                                <th class="px-4 py-3 text-left font-bold text-slate-700">Số Lượng Khóa Học Đứng Lớp</th>
-                                <th class="px-4 py-3 text-left font-bold text-slate-700">Tổng Số Lượt Học Viên</th>
-                                <th class="px-4 py-3 text-left font-bold text-slate-700">Hình Thức Giảng Dạy Chủ Đạo</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-slate-200">
-                            <tr class="hover:bg-slate-50">
-                                <td class="px-4 py-2.5 font-bold text-slate-800">Nguyễn Lê Nhật Vi</td>
-                                <td class="px-4 py-2.5 font-semibold text-slate-600">15 khóa</td>
-                                <td class="px-4 py-2.5 font-bold text-blue-900">546 lượt học</td>
-                                <td class="px-4 py-2.5 text-slate-500">Giảng dạy trực tiếp (ILT)</td>
-                            </tr>
-                            <tr class="hover:bg-slate-50">
-                                <td class="px-4 py-2.5 font-bold text-slate-800">Nguyễn Thị Thu Phương</td>
-                                <td class="px-4 py-2.5 font-semibold text-slate-600">25 khóa</td>
-                                <td class="px-4 py-2.5 font-bold text-blue-900">493 lượt học</td>
-                                <td class="px-4 py-2.5 text-slate-500">Giảng dạy trực tiếp (ILT)</td>
-                            </tr>
-                            <tr class="hover:bg-slate-50">
-                                <td class="px-4 py-2.5 font-bold text-slate-800">Trần Linh Trang</td>
-                                <td class="px-4 py-2.5 font-semibold text-slate-600">21 khóa</td>
-                                <td class="px-4 py-2.5 font-bold text-blue-900">404 lượt học</td>
-                                <td class="px-4 py-2.5 text-slate-500">Giảng dạy trực tiếp (ILT)</td>
-                            </tr>
-                            <tr class="hover:bg-slate-50">
-                                <td class="px-4 py-2.5 font-bold text-slate-800">Nội bộ (Hỗ trợ chung)</td>
-                                <td class="px-4 py-2.5 font-semibold text-slate-600">16 khóa</td>
-                                <td class="px-4 py-2.5 font-bold text-blue-900">391 lượt học</td>
-                                <td class="px-4 py-2.5 text-slate-500">Giảng dạy trực tiếp / Khác</td>
-                            </tr>
-                            <tr class="hover:bg-slate-50">
-                                <td class="px-4 py-2.5 font-bold text-slate-800">Trần Nguyên Hạo</td>
-                                <td class="px-4 py-2.5 font-semibold text-slate-600">2 khóa</td>
-                                <td class="px-4 py-2.5 font-bold text-blue-900">82 lượt học</td>
-                                <td class="px-4 py-2.5 text-slate-500">Giảng dạy trực tiếp (ILT)</td>
-                            </tr>
-                            <tr class="hover:bg-slate-50">
-                                <td class="px-4 py-2.5 font-bold text-slate-800">SM (Sản phẩm / Quản lý)</td>
-                                <td class="px-4 py-2.5 font-semibold text-slate-600">7 khóa</td>
-                                <td class="px-4 py-2.5 font-bold text-blue-900">18 lượt học</td>
-                                <td class="px-4 py-2.5 text-slate-500">Giảng dạy trực tiếp (ILT)</td>
-                            </tr>
-                            <tr class="hover:bg-slate-50">
-                                <td class="px-4 py-2.5 font-bold text-slate-800">Đỗ Hoàng Sơn</td>
-                                <td class="px-4 py-2.5 font-semibold text-slate-600">1 khóa</td>
-                                <td class="px-4 py-2.5 font-bold text-blue-900">15 lượt học</td>
-                                <td class="px-4 py-2.5 text-slate-500">Giảng dạy trực tiếp (ILT)</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- SCRIPT CHUYỂN TAB & KHỞI TẠO BIỂU ĐỒ -->
-    <script>
-        // Danh sách 17 khóa học gốc duy nhất sau khi làm sạch bằng code Python
-        const lmsCourses = [
-            { name: "An toàn thông tin", module: "Văn hóa" },
-            { name: "Integrity", module: "Văn hóa" },
-            { name: "Đào tạo hội nhập", module: "Văn hóa" },
-            { name: "Văn hóa", module: "Văn hóa" },
-            { name: "COC - CRM", module: "Chuyên môn" },
-            { name: "Đào tạo sản phẩm", module: "Chuyên môn" },
-            { name: "Đào tạo Sản phẩm KV1", module: "Chuyên môn" },
-            { name: "Đào tạo Sản phẩm Retail 01", module: "Chuyên môn" },
-            { name: "Đào tạo Sản phẩm Retail 02", module: "Chuyên môn" },
-            { name: "Đào tạo Sản phẩm FNB 01", module: "Chuyên môn" },
-            { name: "Đào tạo HĐĐT - Thuế - Kế toán", module: "Chuyên môn" },
-            { name: "Quy trình cuộc gọi DVKH Hotline", module: "Chuyên môn" },
-            { name: "Hướng dẫn thao tác công cụ làm việc DVKH Hotline", module: "Chuyên môn" },
-            { name: "Đào tạo Tính năng KiotViet Hotel", module: "Chuyên môn" },
-            { name: "Đào tạo Tính năng KiotViet Salon", module: "Chuyên môn" },
-            { name: "Đào tạo Phần cứng + Tính năng KiotViet FNB", module: "Chuyên môn" },
-            { name: "Kỹ năng tiếp cận thu hút khách hàng", module: "Kỹ năng" }
-        ];
-
-        // Tự động render bảng danh sách khóa học LMS
-        const tableBody = document.getElementById('lms-table-body');
-        let currentStt = 1;
-        lmsCourses.forEach(c => {
-            const row = document.createElement('tr');
-            row.className = "hover:bg-slate-50";
-            row.innerHTML = `
-                <td class="px-4 py-2.5 text-slate-500 font-semibold">${currentStt++}</td>
-                <td class="px-4 py-2.5 font-medium text-slate-800">${c.name}</td>
-                <td class="px-4 py-2.5"><span class="px-2.5 py-0.5 rounded-full text-xs font-semibold ${c.module === 'Chuyên môn' ? 'bg-blue-100 text-blue-800' : c.module === 'Văn hóa' ? 'bg-purple-100 text-purple-800' : 'bg-amber-100 text-amber-800'}">${c.module}</span></td>
-            `;
-            tableBody.appendChild(row);
-        });
-
-        // Hàm chuyển đổi Tab
-        function switchTab(tabId) {
-            const tabs = ['tab1', 'tab2', 'tab3'];
-            tabs.forEach(id => {
-                const element = document.getElementById(id);
-                const btn = document.getElementById(id + '-btn');
-                if (id === tabId) {
-                    element.classList.remove('hidden');
-                    element.classList.add('block');
-                    btn.classList.add('border-blue-800', 'text-blue-800');
-                    btn.classList.remove('text-slate-500');
-                } else {
-                    element.classList.remove('block');
-                    element.classList.add('hidden');
-                    btn.classList.remove('border-blue-800', 'text-blue-800');
-                    btn.classList.add('text-slate-500');
-                }
-            });
-            setTimeout(() => {
-                Plotly.Plots.resize('chart-onboarding-trend');
-                Plotly.Plots.resize('chart-attrition-training');
-                Plotly.Plots.resize('chart-lms-compare');
-                Plotly.Plots.resize('chart-lms-distribution');
-                Plotly.Plots.resize('chart-instructor-share');
-            }, 50);
+    <title>Power BI - Báo cáo Đào tạo H1.2026</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        /* Power BI System Colors */
+        :root {
+            --pbi-bg: #f3f2f1;
+            --pbi-card: #ffffff;
+            --pbi-blue: #118dff;
+            --pbi-dark-blue: #12239e;
+            --pbi-text: #252423;
+            --pbi-subtext: #605e5c;
+            --pbi-border: #edebe9;
+            --pbi-accent: #f37021; /* KiotViet Orange as accent */
         }
 
-        const commonLayout = {
-            margin: { t: 20, b: 40, l: 40, r: 20 },
-            hovermode: 'closest',
-            plot_bgcolor: 'rgba(0,0,0,0)',
-            paper_bgcolor: 'rgba(0,0,0,0)',
-            font: { family: 'Segoe UI, sans-serif' }
-        };
+        * { box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', wf_segoe-ui_normal, helvetica, arial, sans-serif;
+            background-color: var(--pbi-bg);
+            margin: 0;
+            color: var(--pbi-text);
+            overflow: hidden;
+        }
 
-        // 1. Biểu đồ Onboarding Trend (Tab 1)
-        const trendTrace = {
-            x: ['Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5', 'Tháng 6'],
-            y: [63, 19, 182, 26, 80, 95],
-            type: 'bar',
-            marker: { color: '#1E3E7C' },
-            text: ['63 người', '19 người', '182 người', '26 người', '80 người', '95 người'],
-            textposition: 'auto',
-        };
-        Plotly.newPlot('chart-onboarding-trend', [trendTrace], {
-            ...commonLayout,
-            yaxis: { gridcolor: '#F1F5F9', showgrid: true }
-        }, {responsive: true, displayModeBar: false});
+        /* Power BI Top Navigation Tab Style */
+        .tab-container {
+            background-color: white;
+            display: flex;
+            padding: 0 20px;
+            border-bottom: 1px solid var(--pbi-border);
+            gap: 2px;
+            height: 40px;
+            align-items: flex-end;
+        }
 
-        // 2. BIỂU ĐỒ: Tỷ Lệ Nghỉ Việc TRONG Thời Gian Đào Tạo (Tab 1)
-        const attrTrainingTrace = {
-            x: ['Direct Sales (DS)', 'Telesales (TS)', 'Khối Backoffice/Khác'],
-            y: [9.69, 6.78, 2.25],
-            type: 'bar',
-            marker: { color: ['#EF4444', '#F59E0B', '#10B981'] },
-            text: ['9.69%', '6.78%', '2.25%'],
-            textposition: 'auto',
-        };
-        Plotly.newPlot('chart-attrition-training', [attrTrainingTrace], {
-            ...commonLayout,
-            yaxis: { title: 'Tỷ lệ nghỉ trong học (%)', range: [0, 15], gridcolor: '#F1F5F9', showgrid: true }
-        }, {responsive: true, displayModeBar: false});
+        .tab-item {
+            padding: 8px 20px;
+            cursor: pointer;
+            font-size: 13px;
+            color: var(--pbi-subtext);
+            border: 1px solid transparent;
+            background: #fcfcfc;
+            border-radius: 4px 4px 0 0;
+            margin-bottom: -1px;
+        }
 
-        // 3. Biểu đồ so sánh LMS vs Offline (Tab 2)
-        const lmsCompareTrace1 = {
-            x: ['Tỷ lệ hoàn thành (%)', 'Điểm trung bình (bài thi)', 'Tỷ lệ nghỉ trong học (%)'],
-            y: [98.13, 93.81, 0.93],
-            name: 'Học trực tuyến (LMS)',
-            type: 'bar',
-            marker: { color: '#10B981' }
-        };
-        const lmsCompareTrace2 = {
-            x: ['Tỷ lệ hoàn thành (%)', 'Điểm trung bình (bài thi)', 'Tỷ lệ nghỉ trong học (%)'],
-            y: [97.69, 97.65, 1.59],
-            name: 'Đào tạo trực tiếp (ILT)',
-            type: 'bar',
-            marker: { color: '#1E3E7C' }
-        };
-        Plotly.newPlot('chart-lms-compare', [lmsCompareTrace1, lmsCompareTrace2], {
-            ...commonLayout,
-            barmode: 'group',
-            yaxis: { gridcolor: '#F1F5F9', showgrid: true },
-            legend: { orientation: 'h', y: -0.15 }
-        }, {responsive: true, displayModeBar: false});
+        .tab-item:hover { background: #eee; }
+        .tab-item.active {
+            background: white;
+            border: 1px solid var(--pbi-border);
+            border-bottom: 2px solid var(--pbi-blue);
+            color: var(--pbi-blue);
+            font-weight: 600;
+        }
 
-        // 4. Biểu đồ phân phối điểm LMS (Tab 2)
-        const lmsDistTrace = {
-            x: [73, 80, 83, 85, 87, 88, 90, 93, 95, 97, 98, 100],
-            y: [5, 12, 16, 22, 13, 31, 38, 63, 11, 118, 19, 604],
-            type: 'bar',
-            marker: { color: '#0EA5E9' },
-            name: 'Số bài thi đạt mức điểm'
-        };
-        Plotly.newPlot('chart-lms-distribution', [lmsDistTrace], {
-            ...commonLayout,
-            xaxis: { title: 'Mức điểm thi đạt được (Bài thi > 0đ)' },
-            yaxis: { title: 'Số lượng bài thi', gridcolor: '#F1F5F9', showgrid: true }
-        }, {responsive: true, displayModeBar: false});
+        /* Layout Structure */
+        .report-canvas {
+            display: flex;
+            height: calc(100vh - 40px);
+            padding: 15px;
+            gap: 15px;
+        }
 
-        // 5. BIỂU ĐỒ MỚI: Phân bổ lượt học viên theo Giảng viên (Tab 3)
-        const instructorTrace = {
-            x: ['Nguyễn Lê Nhật Vi', 'Nguyễn Thị Thu Phương', 'Trần Linh Trang', 'Nội bộ', 'Trần Nguyên Hạo', 'SM', 'Đỗ Hoàng Sơn'],
-            y: [546, 493, 404, 391, 82, 18, 15],
-            type: 'bar',
-            marker: { color: '#1E3E7C' },
-            text: ['546 lượt', '493 lượt', '404 lượt', '391 lượt', '82 lượt', '18 lượt', '15 lượt'],
-            textposition: 'auto',
-        };
-        Plotly.newPlot('chart-instructor-share', [instructorTrace], {
-            ...commonLayout,
-            yaxis: { gridcolor: '#F1F5F9', showgrid: true }
-        }, {responsive: true, displayModeBar: false});
+        /* Filter Panel (Left Slicer) */
+        .slicer-panel {
+            width: 200px;
+            background: #fdfdfd;
+            border: 1px solid var(--pbi-border);
+            padding: 15px;
+            border-radius: 4px;
+        }
 
+        .slicer-title { font-size: 12px; font-weight: 600; margin-bottom: 10px; color: var(--pbi-subtext); text-transform: uppercase; }
+        .slicer-item { font-size: 13px; padding: 5px 0; display: flex; align-items: center; gap: 8px; color: var(--pbi-text); }
+
+        /* Visual Content Area */
+        .visuals-grid {
+            flex-grow: 1;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            grid-template-rows: auto 120px 1fr;
+            gap: 15px;
+            overflow-y: auto;
+        }
+
+        /* Visual Elements */
+        .visual-card {
+            background: var(--pbi-card);
+            border: 1px solid var(--pbi-border);
+            padding: 15px;
+            border-radius: 4px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .visual-title {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #333;
+            border-bottom: 1px solid #f8f8f8;
+            padding-bottom: 5px;
+        }
+
+        /* KPI Card Style */
+        .kpi-visual { text-align: center; display: flex; flex-direction: column; justify-content: center; }
+        .kpi-value { font-size: 28px; font-weight: 700; color: var(--pbi-blue); }
+        .kpi-label { font-size: 12px; color: var(--pbi-subtext); margin-top: 5px; }
+
+        /* Module List (Text Area) */
+        .module-text-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+        .module-item { font-size: 13px; padding: 6px; background: #fcfcfc; border: 1px solid #f0f0f0; }
+        .module-item b { color: var(--pbi-blue); }
+
+        /* Table Style */
+        .pbi-table-container { grid-column: span 4; overflow: auto; }
+        table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        th { position: sticky; top: 0; background: #f9f9f8; padding: 10px; text-align: left; border-bottom: 2px solid var(--pbi-border); color: var(--pbi-subtext); }
+        td { padding: 10px; border-bottom: 1px solid var(--pbi-border); }
+        tr:nth-child(even) { background-color: #fcfcfc; }
+        tr:hover { background-color: #f1f4ff; }
+
+        /* Conditional Formatting */
+        .off-high { color: var(--danger-color); font-weight: 600; }
+        .pass-high { color: #27ae60; font-weight: 600; }
+
+        /* Gauge simulation */
+        .gauge-visual {
+            height: 100px; width: 100%;
+            background: radial-gradient(circle at 50% 100%, var(--pbi-blue) 0%, var(--pbi-blue) 84%, #eee 85%);
+            border-radius: 100px 100px 0 0;
+            position: relative;
+            margin-top: 10px;
+        }
+        .gauge-value { position: absolute; bottom: 0; width: 100%; text-align: center; font-size: 20px; font-weight: 800; }
+
+        .page-content { display: none; }
+        .page-content.active { display: block; }
+        
+        .header-title { grid-column: span 4; font-size: 18px; font-weight: 700; color: var(--pbi-dark-blue); margin-bottom: -5px;}
+
+    </style>
+</head>
+<body>
+
+    <!-- TOP TAB BAR -->
+    <div class="tab-container">
+        <div class="tab-item active" onclick="switchPage('p1', this)">Onboarding & Attrition</div>
+        <div class="tab-item" onclick="switchPage('p2', this)">Báo cáo Giảng viên</div>
+        <div class="tab-item" onclick="switchPage('p3', this)">Hiệu suất LMS & Compliance</div>
+    </div>
+
+    <div class="report-canvas">
+        
+        <!-- LEFT SLICERS (Bộ lọc) -->
+        <div class="slicer-panel">
+            <div class="slicer-title">Bộ lọc báo cáo</div>
+            <div class="slicer-item"><input type="checkbox" checked> H1.2026</div>
+            <div style="margin-top:20px" class="slicer-title">Khối (Business Unit)</div>
+            <div class="slicer-item"><input type="checkbox" checked> Software Business</div>
+            <div class="slicer-item"><input type="checkbox" checked> Finance Business</div>
+            <div style="margin-top:20px" class="slicer-title">Loại Học Viên</div>
+            <div class="slicer-item"><input type="radio" name="type" checked> Nhân viên mới</div>
+            <div class="slicer-item"><input type="radio" name="type"> Đang làm việc</div>
+        </div>
+
+        <!-- PAGE 1: OVERVIEW -->
+        <div id="p1" class="visuals-grid page-content active">
+            <div class="header-title">Executive Overview - Đào tạo nhân sự mới H1.2026</div>
+            
+            <div class="visual-card kpi-visual">
+                <div class="kpi-value">824</div>
+                <div class="kpi-label">Tổng học viên đào tạo</div>
+            </div>
+            <div class="visual-card kpi-visual">
+                <div class="kpi-value">487</div>
+                <div class="kpi-label">Học viên Onboarding</div>
+            </div>
+            <div class="visual-card kpi-visual">
+                <div class="kpi-value">143</div>
+                <div class="kpi-label">Lớp học đã mở</div>
+            </div>
+            <div class="visual-card kpi-visual" style="border-left: 5px solid #e63946">
+                <div class="kpi-value" style="color:#e63946">10.6%</div>
+                <div class="kpi-label">Tỷ lệ OFF đào tạo</div>
+            </div>
+
+            <!-- Module Text Visual -->
+            <div class="visual-card" style="grid-column: span 2; grid-row: span 1;">
+                <div class="visual-title">Phân bổ Module Đào tạo (43 Modules)</div>
+                <div class="module-text-grid">
+                    <div class="module-item">PTSP: <b>16</b></div>
+                    <div class="module-item">Chuyên môn: <b>14</b></div>
+                    <div class="module-item">Kỹ năng: <b>7</b></div>
+                    <div class="module-item">Văn hoá: <b>4</b></div>
+                    <div class="module-item" style="grid-column: span 2">Leadership: <b>2</b></div>
+                </div>
+            </div>
+
+            <div class="visual-card" style="grid-column: span 2">
+                <div class="visual-title">Ghi chú vận hành</div>
+                <p style="font-size: 12px; margin: 0; color: var(--pbi-subtext)">
+                    - Khối DS chiếm tỷ trọng Onboarding cao nhất (54%).<br>
+                    - Nhóm Back Office & CS có tỷ lệ ổn định đạt mức 96%.<br>
+                    - Cần chú ý tỷ lệ nghỉ việc tại khu vực Mekong và Tây Nguyên.
+                </p>
+            </div>
+
+            <!-- Data Table -->
+            <div class="visual-card pbi-table-container" style="grid-row: span 1;">
+                <div class="visual-title">Chi tiết Onboarding theo Nhóm phòng ban</div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Nhóm phòng ban</th>
+                            <th>Số lượng mới</th>
+                            <th>Đang làm việc</th>
+                            <th>Nghỉ việc (OFF)</th>
+                            <th>Tỷ lệ giữ chân</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><b>Back Office / Customer Service</b></td><td>112</td><td>108</td><td>4</td><td class="pass-high">96.4%</td></tr>
+                        <tr><td>Contract renewal (KVS)</td><td>32</td><td>32</td><td>0</td><td>100.0%</td></tr>
+                        <tr><td>DS Đông Bắc</td><td>44</td><td>40</td><td>4</td><td>90.9%</td></tr>
+                        <tr><td>DS Hồ Chí Minh</td><td>56</td><td>50</td><td>6</td><td>89.3%</td></tr>
+                        <tr><td>DS Mekong</td><td>38</td><td>32</td><td>6</td><td>84.2%</td></tr>
+                        <tr><td>DS Miền Bắc</td><td>48</td><td>45</td><td>3</td><td>93.8%</td></tr>
+                        <tr><td>DS Miền Nam</td><td>22</td><td>20</td><td>2</td><td>90.9%</td></tr>
+                        <tr><td>DS Miền Trung</td><td>41</td><td>35</td><td>6</td><td>85.4%</td></tr>
+                        <tr><td>DS Tây Nguyên</td><td>19</td><td>16</td><td>3</td><td>84.2%</td></tr>
+                        <tr><td>Finance Service</td><td>12</td><td>12</td><td>0</td><td class="pass-high">100.0%</td></tr>
+                        <tr><td>Production</td><td>55</td><td>54</td><td>1</td><td class="pass-high">98.2%</td></tr>
+                        <tr><td>TSHN</td><td>18</td><td>14</td><td>4</td><td style="color:#e63946">77.8%</td></tr>
+                        <tr><td>TSSGN</td><td>17</td><td>14</td><td>3</td><td style="color:#e63946">82.4%</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- PAGE 2: TRAINERS -->
+        <div id="p2" class="visuals-grid page-content">
+            <div class="header-title">Phân tích hiệu suất Giảng viên & Đứng lớp</div>
+            <div class="visual-card kpi-visual">
+                <div class="kpi-value">5</div>
+                <div class="kpi-label">Giảng viên Core (Trainers)</div>
+            </div>
+            <div class="visual-card kpi-visual">
+                <div class="kpi-value">62</div>
+                <div class="kpi-label">Số lớp Trainers đảm nhiệm</div>
+            </div>
+            <div class="visual-card kpi-visual">
+                <div class="kpi-value">94.2%</div>
+                <div class="kpi-label">Tỷ lệ Pass trung bình</div>
+            </div>
+            <div class="visual-card kpi-visual">
+                <div class="kpi-value">2.4%</div>
+                <div class="kpi-label">Tỷ lệ OFF lớp Trainers</div>
+            </div>
+
+            <div class="visual-card pbi-table-container" style="grid-row: span 2;">
+                <div class="visual-title">Bảng theo dõi hiệu suất giảng dạy</div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Tên Giảng viên</th>
+                            <th>Phân nhóm</th>
+                            <th>Số lớp</th>
+                            <th>Tỷ lệ Pass</th>
+                            <th>Tỷ lệ OFF</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>Nguyễn Lê Nhật Vi</td><td>Trainer</td><td>32</td><td>98.5%</td><td>1.2%</td></tr>
+                        <tr><td>Đỗ Hoàng Sơn</td><td>Trainer</td><td>20</td><td>96.8%</td><td>1.8%</td></tr>
+                        <tr><td>Nguyễn Thị Thu Phương</td><td>Trainer</td><td>25</td><td>91.0%</td><td>5.4%</td></tr>
+                        <tr><td>Trần Linh Trang</td><td>Trainer</td><td>28</td><td>94.2%</td><td>2.5%</td></tr>
+                        <tr><td>Trần Nguyên Hạo</td><td>Trainer</td><td>12</td><td>100.0%</td><td>0.5%</td></tr>
+                        <tr><td>Nhóm Nội bộ / SM</td><td>Nội bộ</td><td>45</td><td>82.4%</td><td style="color:#e63946">14.2%</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- PAGE 3: LMS -->
+        <div id="p3" class="visuals-grid page-content">
+            <div class="header-title">Hiệu suất hệ thống LMS & Compliance (Tuần 1)</div>
+            
+            <div class="visual-card kpi-visual">
+                <div class="kpi-value">28 / 43</div>
+                <div class="kpi-label">Module đã số hoá</div>
+            </div>
+            <div class="visual-card kpi-visual">
+                <div class="kpi-value">86.4%</div>
+                <div class="kpi-label">Tỷ lệ bao phủ LMS</div>
+            </div>
+            <div class="visual-card kpi-visual">
+                <div class="kpi-value">412 / 487</div>
+                <div class="kpi-label">Hoàn thành Lộ trình Tuần 1</div>
+            </div>
+            <div class="visual-card kpi-visual" style="border-left: 5px solid #27ae60">
+                <div class="kpi-value" style="color:#27ae60">84.6%</div>
+                <div class="kpi-label">Tỷ lệ Compliance</div>
+            </div>
+
+            <div class="visual-card" style="grid-column: span 2; grid-row: span 2;">
+                <div class="visual-title">Phân tích Lộ trình Tuần 1 (Compliance)</div>
+                <p style="font-size:12px; color:var(--pbi-subtext)">Dựa trên dữ liệu 487 học viên mới</p>
+                
+                <div style="margin-top:20px">
+                    <div style="display:flex; justify-content: space-between; font-size: 13px;"><span>Hội nhập</span><b>98%</b></div>
+                    <div style="height:15px; background:#eee; margin: 5px 0 15px 0"><div style="width:98%; height:100%; background:var(--pbi-blue)"></div></div>
+                    
+                    <div style="display:flex; justify-content: space-between; font-size: 13px;"><span>Văn hoá</span><b>92%</b></div>
+                    <div style="height:15px; background:#eee; margin: 5px 0 15px 0"><div style="width:92%; height:100%; background:var(--pbi-blue)"></div></div>
+                    
+                    <div style="display:flex; justify-content: space-between; font-size: 13px;"><span>ATTT / Sản phẩm</span><b>84%</b></div>
+                    <div style="height:15px; background:#eee; margin: 5px 0 15px 0"><div style="width:84%; height:100%; background:var(--pbi-blue)"></div></div>
+                </div>
+            </div>
+
+            <div class="visual-card" style="grid-column: span 2; grid-row: span 2;">
+                <div class="visual-title">Tiến độ hoàn thành mục tiêu (Gauge)</div>
+                <div class="gauge-visual">
+                    <div class="gauge-value">84.6%</div>
+                </div>
+                <p style="font-size: 12px; text-align: center; margin-top: 40px; color: var(--pbi-subtext)">
+                    <b>Mục tiêu:</b> 95% hoàn thành lộ trình đào tạo trong 7 ngày đầu tiên.
+                </p>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        function switchPage(pageId, element) {
+            // Hide all pages
+            document.querySelectorAll('.page-content').forEach(p => p.classList.remove('active'));
+            // Remove active tab style
+            document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+            
+            // Show selected page
+            document.getElementById(pageId).classList.add('active');
+            // Active current tab
+            element.classList.add('active');
+        }
     </script>
 </body>
 </html>
