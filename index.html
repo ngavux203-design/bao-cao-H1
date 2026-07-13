@@ -3,355 +3,390 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Power BI - Báo cáo Đào tạo H1.2026</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <title>KiotViet L&D Analytics H1.2026</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* Power BI System Colors */
         :root {
-            --pbi-bg: #f3f2f1;
-            --pbi-card: #ffffff;
-            --pbi-blue: #118dff;
-            --pbi-dark-blue: #12239e;
-            --pbi-text: #252423;
-            --pbi-subtext: #605e5c;
-            --pbi-border: #edebe9;
-            --pbi-accent: #f37021; /* KiotViet Orange as accent */
+            --bg: #f0f2f5;
+            --primary: #1e3e7c; /* Navy */
+            --kv-orange: #f37021; /* KiotViet Orange */
+            --emerald: #10b981;
+            --rose: #ef4444;
+            --white: #ffffff;
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
         }
 
-        * { box-sizing: border-box; }
-        body {
-            font-family: 'Segoe UI', wf_segoe-ui_normal, helvetica, arial, sans-serif;
-            background-color: var(--pbi-bg);
-            margin: 0;
-            color: var(--pbi-text);
-            overflow: hidden;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Inter', sans-serif; background-color: var(--bg); padding: 20px; color: #1e293b; }
+        .container { max-width: 1400px; margin: 0 auto; }
 
-        /* Power BI Top Navigation Tab Style */
-        .tab-container {
-            background-color: white;
+        /* HEADER */
+        .header {
+            background: linear-gradient(135deg, var(--primary) 0%, #2d559e 100%);
+            padding: 25px 35px;
+            border-radius: 20px;
             display: flex;
-            padding: 0 20px;
-            border-bottom: 1px solid var(--pbi-border);
-            gap: 2px;
-            height: 40px;
-            align-items: flex-end;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: var(--shadow);
+            margin-bottom: 25px;
+            color: white;
         }
+        .header h1 { font-size: 24px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; }
+        .header p { font-size: 14px; opacity: 0.9; margin-top: 4px; }
 
-        .tab-item {
-            padding: 8px 20px;
+        /* TABS */
+        .nav-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+            background: rgba(226, 232, 240, 0.8);
+            padding: 6px;
+            border-radius: 14px;
+            width: fit-content;
+        }
+        .tab-btn {
+            padding: 12px 24px;
+            border-radius: 10px;
             cursor: pointer;
-            font-size: 13px;
-            color: var(--pbi-subtext);
-            border: 1px solid transparent;
-            background: #fcfcfc;
-            border-radius: 4px 4px 0 0;
-            margin-bottom: -1px;
-        }
-
-        .tab-item:hover { background: #eee; }
-        .tab-item.active {
-            background: white;
-            border: 1px solid var(--pbi-border);
-            border-bottom: 2px solid var(--pbi-blue);
-            color: var(--pbi-blue);
-            font-weight: 600;
-        }
-
-        /* Layout Structure */
-        .report-canvas {
+            font-weight: 700;
+            font-size: 14px;
+            color: #64748b;
+            border: none;
+            background: transparent;
             display: flex;
-            height: calc(100vh - 40px);
-            padding: 15px;
-            gap: 15px;
+            align-items: center;
+            gap: 10px;
+        }
+        .tab-btn.active {
+            background: var(--white);
+            color: var(--primary);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
 
-        /* Filter Panel (Left Slicer) */
-        .slicer-panel {
-            width: 200px;
-            background: #fdfdfd;
-            border: 1px solid var(--pbi-border);
-            padding: 15px;
-            border-radius: 4px;
-        }
-
-        .slicer-title { font-size: 12px; font-weight: 600; margin-bottom: 10px; color: var(--pbi-subtext); text-transform: uppercase; }
-        .slicer-item { font-size: 13px; padding: 5px 0; display: flex; align-items: center; gap: 8px; color: var(--pbi-text); }
-
-        /* Visual Content Area */
-        .visuals-grid {
-            flex-grow: 1;
+        /* KPI SECTION */
+        .kpi-row {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            grid-template-rows: auto 120px 1fr;
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+        .kpi-card {
+            background: var(--white);
+            padding: 25px;
+            border-radius: 20px;
+            box-shadow: var(--shadow);
+            text-align: left;
+            position: relative;
+            overflow: hidden;
+        }
+        .kpi-card::after {
+            content: ''; position: absolute; left: 0; top: 0; width: 6px; height: 100%; background: var(--kv-orange);
+        }
+        .kpi-card .label { font-size: 11px; font-weight: 700; color: #94a3b8; text-transform: uppercase; margin-bottom: 8px; display: block; }
+        .kpi-card .value { font-size: 36px; font-weight: 800; color: var(--primary); }
+
+        /* MODULES BLOCK */
+        .module-row {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
             gap: 15px;
-            overflow-y: auto;
+            margin-bottom: 25px;
         }
-
-        /* Visual Elements */
-        .visual-card {
-            background: var(--pbi-card);
-            border: 1px solid var(--pbi-border);
+        .module-item {
+            background: #ffffff;
             padding: 15px;
-            border-radius: 4px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+            border: 1px solid #edf2f7;
         }
+        .module-item strong { display: block; font-size: 18px; color: var(--primary); }
+        .module-item small { font-size: 11px; color: #64748b; text-transform: uppercase; font-weight: 700;}
 
-        .visual-title {
-            font-size: 14px;
-            font-weight: 600;
-            margin-bottom: 10px;
-            color: #333;
-            border-bottom: 1px solid #f8f8f8;
-            padding-bottom: 5px;
-        }
-
-        /* KPI Card Style */
-        .kpi-visual { text-align: center; display: flex; flex-direction: column; justify-content: center; }
-        .kpi-value { font-size: 28px; font-weight: 700; color: var(--pbi-blue); }
-        .kpi-label { font-size: 12px; color: var(--pbi-subtext); margin-top: 5px; }
-
-        /* Module List (Text Area) */
-        .module-text-grid {
+        /* CHARTS CONTAINER */
+        .charts-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 8px;
+            gap: 25px;
+            margin-bottom: 25px;
         }
-        .module-item { font-size: 13px; padding: 6px; background: #fcfcfc; border: 1px solid #f0f0f0; }
-        .module-item b { color: var(--pbi-blue); }
-
-        /* Table Style */
-        .pbi-table-container { grid-column: span 4; overflow: auto; }
-        table { width: 100%; border-collapse: collapse; font-size: 13px; }
-        th { position: sticky; top: 0; background: #f9f9f8; padding: 10px; text-align: left; border-bottom: 2px solid var(--pbi-border); color: var(--pbi-subtext); }
-        td { padding: 10px; border-bottom: 1px solid var(--pbi-border); }
-        tr:nth-child(even) { background-color: #fcfcfc; }
-        tr:hover { background-color: #f1f4ff; }
-
-        /* Conditional Formatting */
-        .off-high { color: var(--danger-color); font-weight: 600; }
-        .pass-high { color: #27ae60; font-weight: 600; }
-
-        /* Gauge simulation */
-        .gauge-visual {
-            height: 100px; width: 100%;
-            background: radial-gradient(circle at 50% 100%, var(--pbi-blue) 0%, var(--pbi-blue) 84%, #eee 85%);
-            border-radius: 100px 100px 0 0;
-            position: relative;
-            margin-top: 10px;
+        .chart-card {
+            background: var(--white);
+            padding: 25px;
+            border-radius: 20px;
+            box-shadow: var(--shadow);
+            height: 450px;
         }
-        .gauge-value { position: absolute; bottom: 0; width: 100%; text-align: center; font-size: 20px; font-weight: 800; }
+        .chart-card h3 { font-size: 16px; margin-bottom: 20px; color: var(--primary); font-weight: 700; }
 
-        .page-content { display: none; }
-        .page-content.active { display: block; }
-        
-        .header-title { grid-column: span 4; font-size: 18px; font-weight: 700; color: var(--pbi-dark-blue); margin-bottom: -5px;}
+        /* TABLES */
+        .table-card {
+            background: var(--white);
+            border-radius: 20px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            margin-bottom: 25px;
+        }
+        .table-header { padding: 20px 30px; background: #fafafa; border-bottom: 1px solid #f1f5f9; font-weight: 700; color: var(--primary); }
+        table { width: 100%; border-collapse: collapse; }
+        th { padding: 15px 30px; background: #f8fafc; text-align: left; font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; }
+        td { padding: 15px 30px; border-bottom: 1px solid #f1f5f9; font-size: 14px; }
+        tr:hover td { background: #f8fbfd; }
 
+        .tab-content { display: none; }
+        .tab-content.active { display: block; animation: fadeInUp 0.4s ease; }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .note-box {
+            padding: 15px 25px;
+            background: #fff7ed;
+            border-radius: 12px;
+            border-left: 5px solid var(--kv-orange);
+            font-size: 13px;
+            color: #9a3412;
+            margin-top: 20px;
+        }
     </style>
 </head>
 <body>
 
-    <!-- TOP TAB BAR -->
-    <div class="tab-container">
-        <div class="tab-item active" onclick="switchPage('p1', this)">Onboarding & Attrition</div>
-        <div class="tab-item" onclick="switchPage('p2', this)">Báo cáo Giảng viên</div>
-        <div class="tab-item" onclick="switchPage('p3', this)">Hiệu suất LMS & Compliance</div>
+<div class="container">
+    <!-- HEADER -->
+    <header class="header">
+        <div>
+            <h1>Executive Training Dashboard</h1>
+            <p>Phân tích hiệu quả Đào tạo & Onboarding H1.2026</p>
+        </div>
+        <img src="https://kiotviet.vn/images/kiotviet.png" alt="Logo" style="height: 40px; filter: brightness(0) invert(1);">
+    </header>
+
+    <!-- TABS -->
+    <nav class="nav-tabs">
+        <button class="tab-btn active" onclick="switchTab(event, 'tab-overview')"><i class="fa-solid fa-house"></i> Tổng Quan</button>
+        <button class="tab-btn" onclick="switchTab(event, 'tab-onboarding')"><i class="fa-solid fa-user-check"></i> Hoàn thành Lộ trình</button>
+        <button class="tab-btn" onclick="switchTab(event, 'tab-trainer')"><i class="fa-solid fa-chalkboard-user"></i> Giảng Viên & LMS</button>
+    </nav>
+
+    <!-- DYNAMIC KPIs -->
+    <div id="kpi-row" class="kpi-row">
+        <!-- Rendered by JS -->
     </div>
 
-    <div class="report-canvas">
-        
-        <!-- LEFT SLICERS (Bộ lọc) -->
-        <div class="slicer-panel">
-            <div class="slicer-title">Bộ lọc báo cáo</div>
-            <div class="slicer-item"><input type="checkbox" checked> H1.2026</div>
-            <div style="margin-top:20px" class="slicer-title">Khối (Business Unit)</div>
-            <div class="slicer-item"><input type="checkbox" checked> Software Business</div>
-            <div class="slicer-item"><input type="checkbox" checked> Finance Business</div>
-            <div style="margin-top:20px" class="slicer-title">Loại Học Viên</div>
-            <div class="slicer-item"><input type="radio" name="type" checked> Nhân viên mới</div>
-            <div class="slicer-item"><input type="radio" name="type"> Đang làm việc</div>
+    <!-- PAGE 1: OVERVIEW -->
+    <div id="tab-overview" class="tab-content active">
+        <div class="module-row">
+            <div class="module-item"><small>Chuyên môn</small><strong>14 Module</strong></div>
+            <div class="module-item"><small>PTSP</small><strong>16 Module</strong></div>
+            <div class="module-item"><small>Kỹ năng</small><strong>7 Module</strong></div>
+            <div class="module-item"><small>Văn hóa</small><strong>4 Module</strong></div>
+            <div class="module-item"><small>Leadership</small><strong>2 Module</strong></div>
         </div>
 
-        <!-- PAGE 1: OVERVIEW -->
-        <div id="p1" class="visuals-grid page-content active">
-            <div class="header-title">Executive Overview - Đào tạo nhân sự mới H1.2026</div>
-            
-            <div class="visual-card kpi-visual">
-                <div class="kpi-value">824</div>
-                <div class="kpi-label">Tổng học viên đào tạo</div>
-            </div>
-            <div class="visual-card kpi-visual">
-                <div class="kpi-value">487</div>
-                <div class="kpi-label">Học viên Onboarding</div>
-            </div>
-            <div class="visual-card kpi-visual">
-                <div class="kpi-value">143</div>
-                <div class="kpi-label">Lớp học đã mở</div>
-            </div>
-            <div class="visual-card kpi-visual" style="border-left: 5px solid #e63946">
-                <div class="kpi-value" style="color:#e63946">10.6%</div>
-                <div class="kpi-label">Tỷ lệ OFF đào tạo</div>
-            </div>
-
-            <!-- Module Text Visual -->
-            <div class="visual-card" style="grid-column: span 2; grid-row: span 1;">
-                <div class="visual-title">Phân bổ Module Đào tạo (43 Modules)</div>
-                <div class="module-text-grid">
-                    <div class="module-item">PTSP: <b>16</b></div>
-                    <div class="module-item">Chuyên môn: <b>14</b></div>
-                    <div class="module-item">Kỹ năng: <b>7</b></div>
-                    <div class="module-item">Văn hoá: <b>4</b></div>
-                    <div class="module-item" style="grid-column: span 2">Leadership: <b>2</b></div>
-                </div>
-            </div>
-
-            <div class="visual-card" style="grid-column: span 2">
-                <div class="visual-title">Ghi chú vận hành</div>
-                <p style="font-size: 12px; margin: 0; color: var(--pbi-subtext)">
-                    - Khối DS chiếm tỷ trọng Onboarding cao nhất (54%).<br>
-                    - Nhóm Back Office & CS có tỷ lệ ổn định đạt mức 96%.<br>
-                    - Cần chú ý tỷ lệ nghỉ việc tại khu vực Mekong và Tây Nguyên.
-                </p>
-            </div>
-
-            <!-- Data Table -->
-            <div class="visual-card pbi-table-container" style="grid-row: span 1;">
-                <div class="visual-title">Chi tiết Onboarding theo Nhóm phòng ban</div>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Nhóm phòng ban</th>
-                            <th>Số lượng mới</th>
-                            <th>Đang làm việc</th>
-                            <th>Nghỉ việc (OFF)</th>
-                            <th>Tỷ lệ giữ chân</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr><td><b>Back Office / Customer Service</b></td><td>112</td><td>108</td><td>4</td><td class="pass-high">96.4%</td></tr>
-                        <tr><td>Contract renewal (KVS)</td><td>32</td><td>32</td><td>0</td><td>100.0%</td></tr>
-                        <tr><td>DS Đông Bắc</td><td>44</td><td>40</td><td>4</td><td>90.9%</td></tr>
-                        <tr><td>DS Hồ Chí Minh</td><td>56</td><td>50</td><td>6</td><td>89.3%</td></tr>
-                        <tr><td>DS Mekong</td><td>38</td><td>32</td><td>6</td><td>84.2%</td></tr>
-                        <tr><td>DS Miền Bắc</td><td>48</td><td>45</td><td>3</td><td>93.8%</td></tr>
-                        <tr><td>DS Miền Nam</td><td>22</td><td>20</td><td>2</td><td>90.9%</td></tr>
-                        <tr><td>DS Miền Trung</td><td>41</td><td>35</td><td>6</td><td>85.4%</td></tr>
-                        <tr><td>DS Tây Nguyên</td><td>19</td><td>16</td><td>3</td><td>84.2%</td></tr>
-                        <tr><td>Finance Service</td><td>12</td><td>12</td><td>0</td><td class="pass-high">100.0%</td></tr>
-                        <tr><td>Production</td><td>55</td><td>54</td><td>1</td><td class="pass-high">98.2%</td></tr>
-                        <tr><td>TSHN</td><td>18</td><td>14</td><td>4</td><td style="color:#e63946">77.8%</td></tr>
-                        <tr><td>TSSGN</td><td>17</td><td>14</td><td>3</td><td style="color:#e63946">82.4%</td></tr>
-                    </tbody>
-                </table>
-            </div>
+        <div class="table-card">
+            <div class="table-header">CHI TIẾT ONBOARDING THEO 13 NHÓM PHÒNG BAN</div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Phòng ban</th>
+                        <th>Nhân sự mới</th>
+                        <th>Hoàn thành tuần 1</th>
+                        <th>Nghỉ việc (OFF)</th>
+                        <th>Tỷ lệ giữ chân (%)</th>
+                    </tr>
+                </thead>
+                <tbody id="onboarding-table-body">
+                    <!-- JS loop -->
+                </tbody>
+            </table>
         </div>
-
-        <!-- PAGE 2: TRAINERS -->
-        <div id="p2" class="visuals-grid page-content">
-            <div class="header-title">Phân tích hiệu suất Giảng viên & Đứng lớp</div>
-            <div class="visual-card kpi-visual">
-                <div class="kpi-value">5</div>
-                <div class="kpi-label">Giảng viên Core (Trainers)</div>
-            </div>
-            <div class="visual-card kpi-visual">
-                <div class="kpi-value">62</div>
-                <div class="kpi-label">Số lớp Trainers đảm nhiệm</div>
-            </div>
-            <div class="visual-card kpi-visual">
-                <div class="kpi-value">94.2%</div>
-                <div class="kpi-label">Tỷ lệ Pass trung bình</div>
-            </div>
-            <div class="visual-card kpi-visual">
-                <div class="kpi-value">2.4%</div>
-                <div class="kpi-label">Tỷ lệ OFF lớp Trainers</div>
-            </div>
-
-            <div class="visual-card pbi-table-container" style="grid-row: span 2;">
-                <div class="visual-title">Bảng theo dõi hiệu suất giảng dạy</div>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Tên Giảng viên</th>
-                            <th>Phân nhóm</th>
-                            <th>Số lớp</th>
-                            <th>Tỷ lệ Pass</th>
-                            <th>Tỷ lệ OFF</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr><td>Nguyễn Lê Nhật Vi</td><td>Trainer</td><td>32</td><td>98.5%</td><td>1.2%</td></tr>
-                        <tr><td>Đỗ Hoàng Sơn</td><td>Trainer</td><td>20</td><td>96.8%</td><td>1.8%</td></tr>
-                        <tr><td>Nguyễn Thị Thu Phương</td><td>Trainer</td><td>25</td><td>91.0%</td><td>5.4%</td></tr>
-                        <tr><td>Trần Linh Trang</td><td>Trainer</td><td>28</td><td>94.2%</td><td>2.5%</td></tr>
-                        <tr><td>Trần Nguyên Hạo</td><td>Trainer</td><td>12</td><td>100.0%</td><td>0.5%</td></tr>
-                        <tr><td>Nhóm Nội bộ / SM</td><td>Nội bộ</td><td>45</td><td>82.4%</td><td style="color:#e63946">14.2%</td></tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <!-- PAGE 3: LMS -->
-        <div id="p3" class="visuals-grid page-content">
-            <div class="header-title">Hiệu suất hệ thống LMS & Compliance (Tuần 1)</div>
-            
-            <div class="visual-card kpi-visual">
-                <div class="kpi-value">28 / 43</div>
-                <div class="kpi-label">Module đã số hoá</div>
-            </div>
-            <div class="visual-card kpi-visual">
-                <div class="kpi-value">86.4%</div>
-                <div class="kpi-label">Tỷ lệ bao phủ LMS</div>
-            </div>
-            <div class="visual-card kpi-visual">
-                <div class="kpi-value">412 / 487</div>
-                <div class="kpi-label">Hoàn thành Lộ trình Tuần 1</div>
-            </div>
-            <div class="visual-card kpi-visual" style="border-left: 5px solid #27ae60">
-                <div class="kpi-value" style="color:#27ae60">84.6%</div>
-                <div class="kpi-label">Tỷ lệ Compliance</div>
-            </div>
-
-            <div class="visual-card" style="grid-column: span 2; grid-row: span 2;">
-                <div class="visual-title">Phân tích Lộ trình Tuần 1 (Compliance)</div>
-                <p style="font-size:12px; color:var(--pbi-subtext)">Dựa trên dữ liệu 487 học viên mới</p>
-                
-                <div style="margin-top:20px">
-                    <div style="display:flex; justify-content: space-between; font-size: 13px;"><span>Hội nhập</span><b>98%</b></div>
-                    <div style="height:15px; background:#eee; margin: 5px 0 15px 0"><div style="width:98%; height:100%; background:var(--pbi-blue)"></div></div>
-                    
-                    <div style="display:flex; justify-content: space-between; font-size: 13px;"><span>Văn hoá</span><b>92%</b></div>
-                    <div style="height:15px; background:#eee; margin: 5px 0 15px 0"><div style="width:92%; height:100%; background:var(--pbi-blue)"></div></div>
-                    
-                    <div style="display:flex; justify-content: space-between; font-size: 13px;"><span>ATTT / Sản phẩm</span><b>84%</b></div>
-                    <div style="height:15px; background:#eee; margin: 5px 0 15px 0"><div style="width:84%; height:100%; background:var(--pbi-blue)"></div></div>
-                </div>
-            </div>
-
-            <div class="visual-card" style="grid-column: span 2; grid-row: span 2;">
-                <div class="visual-title">Tiến độ hoàn thành mục tiêu (Gauge)</div>
-                <div class="gauge-visual">
-                    <div class="gauge-value">84.6%</div>
-                </div>
-                <p style="font-size: 12px; text-align: center; margin-top: 40px; color: var(--pbi-subtext)">
-                    <b>Mục tiêu:</b> 95% hoàn thành lộ trình đào tạo trong 7 ngày đầu tiên.
-                </p>
-            </div>
-        </div>
-
     </div>
 
-    <script>
-        function switchPage(pageId, element) {
-            // Hide all pages
-            document.querySelectorAll('.page-content').forEach(p => p.classList.remove('active'));
-            // Remove active tab style
-            document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
-            
-            // Show selected page
-            document.getElementById(pageId).classList.add('active');
-            // Active current tab
-            element.classList.add('active');
-        }
-    </script>
+    <!-- PAGE 2: ONBOARDING & COMPLIANCE -->
+    <div id="tab-onboarding" class="tab-content">
+        <div class="charts-grid">
+            <div class="chart-card">
+                <h3>Tỷ lệ Hoàn thành Lộ trình Tuần 1 (Checklist)</h3>
+                <canvas id="chartCompliance"></canvas>
+                <div class="note-box">
+                    <b>Lộ trình tuần 1:</b> Bao gồm Hội nhập, Văn hoá, Sản phẩm/ATTT. Học viên cần đạt 100% các đầu mục này để được tính là hoàn thành.
+                </div>
+            </div>
+            <div class="chart-card">
+                <h3>Số lượng học viên tham gia theo Tháng</h3>
+                <canvas id="chartMonthly"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- PAGE 3: TRAINER -->
+    <div id="tab-trainer" class="tab-content">
+        <div class="charts-grid">
+            <div class="chart-card">
+                <h3>Cơ cấu hình thức giảng dạy</h3>
+                <canvas id="chartTrainerType"></canvas>
+            </div>
+            <div class="chart-card">
+                <h3>Phân bổ lớp học theo Giảng viên</h3>
+                <canvas id="chartLecturers"></canvas>
+            </div>
+        </div>
+        <div class="table-card">
+            <div class="table-header">BẢNG HIỆU SUẤT ĐỘI NGŨ GIẢNG VIÊN (23 NGƯỜI)</div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Giảng viên</th>
+                        <th>Phân loại</th>
+                        <th>Số lớp dạy</th>
+                        <th>Lượt học viên</th>
+                        <th>Tỷ lệ Pass (%)</th>
+                    </tr>
+                </thead>
+                <tbody id="trainer-table-body">
+                    <!-- JS loop -->
+                </tbody>
+            </table>
+            <div style="padding: 15px 30px; font-size: 12px; color: #64748b; background: #f8fafc;">
+                * <b>Tỷ lệ Pass</b> = Học viên đạt / (Tổng học viên - Học viên OFF).<br>
+                * <b>Danh sách 23 GV:</b> Bao gồm 5 Trainers chính, 1 hệ thống LMS và 17 SM/Quản lý chuyên môn đứng lớp.
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const departments = [
+        {n: "Back Office / Customer Service", m: 112, h: 108, o: 4},
+        {n: "Contract renewal (KVS)", m: 32, h: 32, o: 0},
+        {n: "DS Đông Bắc", m: 44, h: 40, o: 4},
+        {n: "DS Hồ Chí Minh", m: 56, h: 50, o: 6},
+        {n: "DS Mekong", m: 38, h: 30, o: 8},
+        {n: "DS Miền Bắc", m: 48, h: 45, o: 3},
+        {n: "DS Miền Nam", m: 22, h: 21, o: 1},
+        {n: "DS Miền Trung", m: 41, h: 35, o: 6},
+        {n: "DS Tây Nguyên", m: 19, h: 16, o: 3},
+        {n: "Finance Service", m: 12, h: 12, o: 0},
+        {n: "Production", m: 55, h: 54, o: 1},
+        {n: "TSHN", m: 18, h: 12, o: 6},
+        {n: "TSSGN", m: 17, h: 12, o: 5}
+    ];
+
+    const kpiData = {
+        'tab-overview': [
+            { label: 'Học viên Đào tạo', value: '824' },
+            { label: 'Onboarding mới', value: '487' },
+            { label: 'Tổng số chương trình', value: '143' },
+            { label: 'Số lớp thực tế', value: '169' }
+        ],
+        'tab-onboarding': [
+            { label: 'SL Onboarding', value: '487' },
+            { label: 'Nhân sự nghỉ (OFF)', value: '52' },
+            { label: 'Tỷ lệ Giữ chân', value: '89.3%' },
+            { label: 'Hoàn thành Tuần 1', value: '84.6%' }
+        ],
+        'tab-trainer': [
+            { label: 'Đội ngũ Giảng viên', value: '23' },
+            { label: 'Giảng viên Core', value: '5' },
+            { label: 'SM / Nội bộ', value: '17' },
+            { label: 'Hệ thống LMS', value: '1' }
+        ]
+    };
+
+    function switchTab(evt, tabId) {
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById(tabId).classList.add('active');
+        evt.currentTarget.classList.add('active');
+
+        const kpis = kpiData[tabId];
+        document.getElementById('kpi-row').innerHTML = kpis.map(k => `
+            <div class="kpi-card">
+                <span class="label">${k.label}</span>
+                <div class="value">${k.value}</div>
+            </div>
+        `).join('');
+
+        initCharts(); 
+    }
+
+    function initTables() {
+        document.getElementById('onboarding-table-body').innerHTML = departments.map(d => `
+            <tr>
+                <td><b>${d.n}</b></td>
+                <td>${d.m}</td>
+                <td>${d.h}</td>
+                <td style="color:var(--rose)">${d.o}</td>
+                <td><b>${((d.m-d.o)/d.m*100).toFixed(1)}%</b></td>
+            </tr>
+        `).join('');
+
+        const trainers = [
+            {n: "Nguyễn Lê Nhật Vi", t: "Trainer", l: 22, s: 450, p: 98.5},
+            {n: "Đỗ Hoàng Sơn", t: "Trainer", l: 18, s: 380, p: 97.2},
+            {n: "Nguyễn Thị Thu Phương", t: "Trainer", l: 20, s: 410, p: 95.0},
+            {n: "Trần Linh Trang", t: "Trainer", l: 15, s: 320, p: 96.1},
+            {n: "Trần Nguyên Hạo", t: "Trainer", l: 10, s: 150, p: 100.0},
+            {n: "Hệ thống LMS", t: "LMS", l: 36, s: 1240, p: 91.5},
+            {n: "Đội ngũ SM/Nội bộ", t: "Nội bộ", l: 48, s: 890, p: 85.4}
+        ];
+        document.getElementById('trainer-table-body').innerHTML = trainers.map(t => `
+            <tr><td><b>${t.n}</b></td><td>${t.t}</td><td>${t.l}</td><td>${t.s}</td><td><b>${t.p}%</b></td></tr>
+        `).join('');
+    }
+
+    let charts = {};
+    function initCharts() {
+        // Destroy existing charts to prevent overlap
+        Object.values(charts).forEach(c => c.destroy());
+
+        // 1. Compliance Pie
+        charts.compliance = new Chart(document.getElementById('chartCompliance'), {
+            type: 'pie',
+            data: {
+                labels: ['Hoàn thành', 'Chưa hoàn thành'],
+                datasets: [{ data: [412, 75], backgroundColor: ['#10b981', '#e2e8f0'] }]
+            },
+            options: { plugins: { legend: { position: 'bottom' } } }
+        });
+
+        // 2. Monthly Bar
+        charts.monthly = new Chart(document.getElementById('chartMonthly'), {
+            type: 'bar',
+            data: {
+                labels: ['T1', 'T2', 'T3', 'T4', 'T5', 'T6'],
+                datasets: [{ label: 'Học viên', data: [120, 95, 185, 140, 160, 124], backgroundColor: '#1e3e7c', borderRadius: 5 }]
+            }
+        });
+
+        // 3. Trainer Type Pie
+        charts.trainerType = new Chart(document.getElementById('chartTrainerType'), {
+            type: 'doughnut',
+            data: {
+                labels: ['Trainers', 'SM / Nội bộ', 'LMS'],
+                datasets: [{ data: [85, 48, 36], backgroundColor: ['#1e3e7c', '#f37021', '#94a3b8'] }]
+            },
+            options: { cutout: '60%', plugins: { legend: { position: 'bottom' } } }
+        });
+
+        // 4. Lecturers Horizontal Bar
+        charts.lecturers = new Chart(document.getElementById('chartLecturers'), {
+            type: 'bar',
+            data: {
+                labels: ['Nhật Vi', 'Thu Phương', 'Hoàng Sơn', 'Linh Trang', 'Nguyên Hạo'],
+                datasets: [{ label: 'Số lớp dạy', data: [22, 20, 18, 15, 10], backgroundColor: '#1e3e7c', borderRadius: 4 }]
+            },
+            options: { indexAxis: 'y' }
+        });
+    }
+
+    window.onload = () => {
+        initTables();
+        switchTab({currentTarget: document.querySelector('.tab-btn')}, 'tab-overview');
+    };
+</script>
+
 </body>
 </html>
