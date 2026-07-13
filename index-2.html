@@ -1,0 +1,1933 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Báo Cáo Đào Tạo & Onboarding - KiotViet</title>
+    <!-- Tailwind CSS for elegant layout -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js for data visualization -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- PapaParse for high-performance CSV parsing directly in client -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <!-- Google Fonts (Inter) -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome for Enterprise Premium Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            navy: '#1E3E7C',
+                            darkNavy: '#11224D',
+                            accent: '#F59E0B',
+                            lightBg: '#F4F6F9',
+                            emerald: '#10B981',
+                            rose: '#EF4444',
+                            slate: '#6B7280',
+                            blueSky: '#06B6D4'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #F4F6F9;
+        }
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #F1F1F1;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #C1C1C1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #A8A8A8;
+        }
+        .active-tab {
+            background-color: #1E3E7C !important;
+            color: white !important;
+            box-shadow: 0 4px 6px -1px rgba(30, 62, 124, 0.2);
+        }
+        .bi-card {
+            background: #FFFFFF;
+            border: 1px solid #E2E8F0;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
+            transition: all 0.2s ease-in-out;
+        }
+        .bi-card:hover {
+            box-shadow: 0 4px 12px 0 rgba(0, 0, 0, 0.05);
+        }
+    </style>
+</head>
+<body class="overflow-x-hidden antialiased">
+
+    <div class="flex flex-col lg:flex-row min-h-screen">
+        
+        <!-- SIDEBAR (Uploader & Filters) -->
+        <aside class="w-full lg:w-80 bg-brand-darkNavy text-slate-100 flex-shrink-0 p-6 flex flex-col justify-between shadow-xl">
+            <div class="space-y-6">
+                <!-- Brand Identity -->
+                <div class="flex items-center space-x-3 pb-4 border-b border-slate-700">
+                    <img src="https://kiotviet.vn/images/kiotviet.png" alt="KiotViet Logo" class="h-8" onerror="this.src='https://placehold.co/120x40/1E3E7C/ffffff?text=KiotViet'">
+                    <div>
+                        <h1 class="text-xs font-extrabold tracking-wider text-white">LEARNING ANALYTICS</h1>
+                        <p class="text-[9px] text-slate-400 font-semibold tracking-widest uppercase">Power BI Dashboard</p>
+                    </div>
+                </div>
+
+                <!-- 1. CSV FILE UPLOADER -->
+                <div class="space-y-2">
+                    <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider">
+                        <i class="fa-solid fa-file-csv text-emerald-400 mr-1.5"></i> Nạp dữ liệu gốc
+                    </label>
+                    <div id="dropzone" class="border-2 border-dashed border-slate-600 hover:border-brand-accent rounded-xl p-4 text-center cursor-pointer transition bg-slate-800/40 group relative">
+                        <input type="file" id="csv-file-input" accept=".csv" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer">
+                        <i class="fa-solid fa-cloud-arrow-up text-2xl text-slate-400 group-hover:text-brand-accent mb-2 block"></i>
+                        <span class="text-xs font-medium text-slate-300 block">Kéo thả tệp tin vào đây hoặc click chọn</span>
+                        <span class="text-[10px] text-slate-400 font-semibold mt-1 block text-brand-accent">Data đào tạo H1.2026 bc.csv</span>
+                        <span class="text-[10px] text-slate-500 block mt-1">Xử lý an toàn ngoại tuyến</span>
+                    </div>
+                    <!-- Status message -->
+                    <div id="upload-status" class="hidden text-xs py-2 px-3 rounded-lg bg-emerald-950/50 border border-emerald-800 text-emerald-400 flex items-center space-x-2">
+                        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                        <span id="upload-status-text">Đã nạp 0 dòng dữ liệu</span>
+                    </div>
+                </div>
+
+                <!-- 2. POWER BI FILTERS -->
+                <div class="space-y-4 pt-4 border-t border-slate-700">
+                    <div class="flex items-center justify-between text-xs font-bold text-slate-300 uppercase tracking-wider">
+                        <span><i class="fa-solid fa-filter mr-1.5 text-brand-accent"></i>Bộ lọc báo cáo</span>
+                        <button onclick="resetFilters()" class="text-[10px] text-slate-400 hover:text-white underline lowercase">Xóa lọc</button>
+                    </div>
+
+                    <!-- Filter: Đối tượng -->
+                    <div class="bg-slate-800/30 p-3 rounded-lg border border-slate-700/60">
+                        <label class="block text-[11px] font-bold text-slate-300 uppercase tracking-wider mb-2">
+                            <i class="fa-solid fa-user-group mr-1 text-sky-400"></i> Đối tượng
+                        </label>
+                        <div id="filter-subjects" class="space-y-1.5 text-xs">
+                            <label class="flex items-center space-x-2 text-slate-300 hover:text-white cursor-pointer">
+                                <input type="checkbox" value="Đang làm việc" checked onchange="toggleFilter('subject', this)" class="rounded border-slate-600 text-brand-accent focus:ring-brand-accent bg-slate-800 w-3.5 h-3.5">
+                                <span>Đang làm việc</span>
+                            </label>
+                            <label class="flex items-center space-x-2 text-slate-300 hover:text-white cursor-pointer">
+                                <input type="checkbox" value="Nhân viên mới" checked onchange="toggleFilter('subject', this)" class="rounded border-slate-600 text-brand-accent focus:ring-brand-accent bg-slate-800 w-3.5 h-3.5">
+                                <span>Nhân viên mới (Onboard)</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Filter: Month -->
+                    <div>
+                        <label class="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-2">Tháng tổ chức</label>
+                        <div id="filter-months" class="space-y-1.5 max-h-32 overflow-y-auto pr-1 text-xs">
+                            <p class="text-slate-500 italic">Đang chờ tệp CSV...</p>
+                        </div>
+                    </div>
+
+                    <!-- Filter: Department Group -->
+                    <div>
+                        <label class="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-2">Nhóm bộ phận</label>
+                        <div id="filter-depts" class="space-y-1.5 text-xs">
+                            <p class="text-slate-500 italic">Đang chờ tệp CSV...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar Footer Status info -->
+            <div class="mt-6 pt-4 border-t border-slate-800 text-[11px] text-slate-500 space-y-1">
+                <div class="flex items-center justify-between">
+                    <span>Phân tích bởi:</span>
+                    <span class="text-slate-300 font-semibold">Data Analyst</span>
+                </div>
+                <div class="flex items-center justify-between">
+                    <span>Phiên bản:</span>
+                    <span class="text-slate-300">BI-Dashboard v3.2</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- MAIN CONTENT AREA -->
+        <main class="flex-grow p-4 md:p-8 overflow-y-auto space-y-6">
+            
+            <!-- Dashboard Top Header -->
+            <header class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 pb-4 border-b border-slate-200">
+                <div>
+                    <h1 class="text-xl md:text-2xl font-extrabold text-brand-darkNavy flex items-center gap-2">
+                        <i class="fa-solid fa-chart-line text-brand-navy"></i>
+                        HỆ THỐNG BÁO CÁO ĐÀO TẠO KIOTVIET H1.2026
+                    </h1>
+                </div>
+                <div class="flex flex-col sm:flex-row gap-2 self-start lg:self-center">
+                    <!-- Quick Load Demo Button -->
+                    <button id="btn-load-demo" onclick="loadMockData()" class="px-3.5 py-2 rounded-lg bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold text-xs transition flex items-center gap-2">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i> Xem thử mẫu (Demo Data)
+                    </button>
+                    <!-- Date badge -->
+                    <div class="flex items-center space-x-2 text-xs text-brand-navy bg-blue-50 px-3.5 py-2 rounded-lg border border-blue-200 shadow-sm">
+                        <i class="fa-solid fa-calendar"></i>
+                        <span id="update-badge" class="font-semibold">Nguồn: Đang chờ tệp CSV...</span>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Landing Notification Box (When no file uploaded) -->
+            <div id="landing-notification" class="bg-gradient-to-r from-blue-50 to-indigo-50 border-l-4 border-brand-navy p-6 rounded-r-xl shadow-sm">
+                <div class="flex items-start">
+                    <div class="flex-shrink-0 text-brand-navy text-2xl mr-4 mt-0.5">
+                        <i class="fa-solid fa-circle-info"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-brand-darkNavy text-sm">Chưa nạp dữ liệu phân tích</h4>
+                        <p class="text-xs text-slate-600 mt-1 max-w-2xl">
+                            Vui lòng kéo và thả tệp <strong class="text-brand-navy">"Data đào tạo H1.2026 bc.csv"</strong> vào vùng tải lên ở Sidebar cột bên trái, hoặc bấm chọn nút <strong class="text-slate-700">"Xem thử mẫu (Demo Data)"</strong> để hiển thị ngay lập tức giao diện báo cáo chuyên sâu.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dynamic Tab Navigation (Tương tự Power BI Tabs) -->
+            <div id="main-dashboard-tabs" class="hidden bg-slate-200/60 p-1.5 rounded-xl flex flex-wrap gap-1 max-w-5xl shadow-inner">
+                <button onclick="switchTab('tab0')" id="btn-tab0" class="flex-1 py-2.5 px-4 rounded-lg text-xs md:text-sm font-semibold text-slate-600 transition-all duration-300 flex items-center justify-center space-x-2 active-tab">
+                    <span>📊 Báo Cáo Tổng Quan</span>
+                </button>
+                <button onclick="switchTab('tab1')" id="btn-tab1" class="flex-1 py-2.5 px-4 rounded-lg text-xs md:text-sm font-semibold text-slate-600 transition-all duration-300 flex items-center justify-center space-x-2 hover:bg-white/50">
+                    <span>🎯 Onboarding & Attrition</span>
+                </button>
+                <button onclick="switchTab('tab2')" id="btn-tab2" class="flex-1 py-2.5 px-4 rounded-lg text-xs md:text-sm font-semibold text-slate-600 transition-all duration-300 flex items-center justify-center space-x-2 hover:bg-white/50">
+                    <span>💻 Hiệu Suất Hệ Thống LMS</span>
+                </button>
+                <button onclick="switchTab('tab3')" id="btn-tab3" class="flex-1 py-2.5 px-4 rounded-lg text-xs md:text-sm font-semibold text-slate-600 transition-all duration-300 flex items-center justify-center space-x-2 hover:bg-white/50">
+                    <span>🗺️ Lộ Trình & Tra Cứu</span>
+                </button>
+                <button onclick="switchTab('tab4')" id="btn-tab4" class="flex-1 py-2.5 px-4 rounded-lg text-xs md:text-sm font-semibold text-slate-600 transition-all duration-300 flex items-center justify-center space-x-2 hover:bg-white/50">
+                    <span>👩‍🏫 Giảng Viên & LMS</span>
+                </button>
+            </div>
+
+            <!-- ========================================== -->
+            <!-- TAB 0 CONTENT: BÁO CÁO TỔNG QUAN -->
+            <!-- ========================================== -->
+            <div id="tab0-content" class="hidden space-y-6 animate-fade-in">
+                <!-- KPI Block Row 1 -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div class="bi-card p-4 rounded-lg text-center bg-white border border-slate-200">
+                        <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider block mb-1">Số NV tham gia đào tạo</span>
+                        <h2 id="tab0-kpi-nv" class="text-2xl md:text-3xl font-extrabold text-brand-darkNavy">0</h2>
+                    </div>
+                    <div class="bi-card p-4 rounded-lg text-center bg-white border border-slate-200">
+                        <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider block mb-1">Số chương trình ĐT</span>
+                        <h2 id="tab0-kpi-chuongtrinh" class="text-2xl md:text-3xl font-extrabold text-brand-darkNavy">0</h2>
+                    </div>
+                    <div class="bi-card p-4 rounded-lg text-center bg-white border border-slate-200">
+                        <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider block mb-1">Tổng Số Lớp</span>
+                        <h2 id="tab0-kpi-malop" class="text-2xl md:text-3xl font-extrabold text-brand-darkNavy">0</h2>
+                    </div>
+                    <div class="bi-card p-4 rounded-lg text-center bg-white border border-slate-200">
+                        <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider block mb-1">Nhóm bộ phận</span>
+                        <h2 id="tab0-kpi-trangthai" class="text-2xl md:text-3xl font-extrabold text-brand-darkNavy">4</h2>
+                    </div>
+                </div>
+
+                <!-- KPI Block Row 2 -->
+                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+                    <div class="bi-card p-3 rounded-lg text-center bg-slate-50 border border-slate-100">
+                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Số CT Chuyên môn</span>
+                        <h3 id="tab0-sub-chuyenmon" class="text-xl font-extrabold text-brand-navy mt-1">0</h3>
+                    </div>
+                    <div class="bi-card p-3 rounded-lg text-center bg-slate-50 border border-slate-100">
+                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Số CT Kỹ năng</span>
+                        <h3 id="tab0-sub-kynang" class="text-xl font-extrabold text-brand-navy mt-1">0</h3>
+                    </div>
+                    <div class="bi-card p-3 rounded-lg text-center bg-slate-50 border border-slate-100">
+                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Số CT Văn hóa</span>
+                        <h3 id="tab0-sub-vanhoa" class="text-xl font-extrabold text-brand-navy mt-1">0</h3>
+                    </div>
+                    <div class="bi-card p-3 rounded-lg text-center bg-slate-50 border border-slate-100">
+                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Số CT PTSP</span>
+                        <h3 id="tab0-sub-ptsp" class="text-xl font-extrabold text-brand-navy mt-1">0</h3>
+                    </div>
+                    <div class="bi-card p-3 rounded-lg text-center bg-slate-50 border border-slate-100">
+                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Số CT Leadership</span>
+                        <h3 id="tab0-sub-leader" class="text-xl font-extrabold text-brand-navy mt-1">0</h3>
+                    </div>
+                    <div class="bi-card p-3 rounded-lg text-center bg-slate-50 border border-slate-100">
+                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Số CT Khác</span>
+                        <h3 id="tab0-sub-khac" class="text-xl font-extrabold text-brand-navy mt-1">0</h3>
+                    </div>
+                </div>
+
+                <!-- Tab 0 Chart Row -->
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                    <!-- Left: Tỉ lệ các nhóm bộ phận -->
+                    <div class="bi-card p-5 rounded-lg flex flex-col h-[380px] lg:col-span-5 bg-white">
+                        <h3 class="font-bold text-slate-700 text-sm mb-3">
+                            <i class="fa-solid fa-chart-pie text-brand-navy mr-1.5"></i>Tỉ lệ nhân sự đào tạo theo Nhóm bộ phận
+                        </h3>
+                        <div class="flex-grow relative flex items-center justify-center">
+                            <canvas id="chart-tab0-status-pie"></canvas>
+                        </div>
+                    </div>
+                    
+                    <!-- Right: Số lượng nhân viên mới theo tháng theo nhóm bộ phận -->
+                    <div class="bi-card p-5 rounded-lg flex flex-col h-[380px] lg:col-span-7 bg-white">
+                        <h3 class="font-bold text-slate-700 text-sm mb-3">
+                            <i class="fa-solid fa-chart-bar text-brand-navy mr-1.5"></i>Số lượng nhân sự mới theo tháng (mỗi nhóm bộ phận)
+                        </h3>
+                        <div class="flex-grow relative">
+                            <canvas id="chart-tab0-new-monthly-status"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ========================================== -->
+            <!-- TAB 1 CONTENT: ONBOARDING & ATTRITION -->
+            <!-- ========================================== -->
+            <div id="tab1-content" class="hidden space-y-6">
+                <!-- KPI Blocks -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <!-- Card 1 -->
+                    <div class="bi-card p-5 rounded-xl flex items-center justify-between border-l-4 border-l-brand-navy bg-white">
+                        <div>
+                            <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Học viên Onboarding mới</span>
+                            <h3 id="kpi-onboard-count" class="text-2xl font-extrabold text-brand-darkNavy mt-1">0 người</h3>
+                        </div>
+                        <div class="w-11 h-11 rounded-lg bg-blue-50 text-brand-navy flex items-center justify-center text-lg shadow-sm">
+                            <i class="fa-solid fa-user-plus"></i>
+                        </div>
+                    </div>
+                    <!-- Card 2 -->
+                    <div class="bi-card p-5 rounded-xl flex items-center justify-between border-l-4 border-l-brand-rose bg-white">
+                        <div>
+                            <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Nghỉ việc trong đào tạo</span>
+                            <h3 id="kpi-dropout-count" class="text-2xl font-extrabold text-brand-rose mt-1">0 người</h3>
+                            <p id="kpi-dropout-rate" class="text-xs font-bold text-brand-rose mt-1">Tỷ lệ: 0.00%</p>
+                        </div>
+                        <div class="w-11 h-11 rounded-lg bg-rose-50 text-brand-rose flex items-center justify-center text-lg shadow-sm">
+                            <i class="fa-solid fa-user-slash"></i>
+                        </div>
+                    </div>
+                    <!-- Card 3 -->
+                    <div class="bi-card p-5 rounded-xl flex items-center justify-between border-l-4 border-l-brand-emerald bg-white">
+                        <div>
+                            <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Hoàn thành hội nhập</span>
+                            <h3 id="kpi-passed-count" class="text-2xl font-extrabold text-brand-emerald mt-1">0 người</h3>
+                        </div>
+                        <div class="w-11 h-11 rounded-lg bg-emerald-50 text-brand-emerald flex items-center justify-center text-lg shadow-sm">
+                            <i class="fa-solid fa-circle-check"></i>
+                        </div>
+                    </div>
+                    <!-- Card 4 -->
+                    <div class="bi-card p-5 rounded-xl flex items-center justify-between border-l-4 border-l-brand-accent bg-white">
+                        <div>
+                            <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Số lớp hội nhập đã mở</span>
+                            <h3 id="kpi-classes-count" class="text-2xl font-extrabold text-brand-accent mt-1">0 lớp</h3>
+                        </div>
+                        <div class="w-11 h-11 rounded-lg bg-amber-50 text-brand-accent flex items-center justify-center text-lg shadow-sm">
+                            <i class="fa-solid fa-school"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chart Row 1 -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- Monthly Onboarding Bar Chart -->
+                    <div class="bi-card p-5 rounded-xl flex flex-col h-[320px] bg-white">
+                        <h3 class="font-bold text-slate-700 text-sm mb-3">
+                            <i class="fa-solid fa-chart-bar text-brand-navy mr-1.5"></i>Số lượng nhân sự onboarding mới theo Tháng
+                        </h3>
+                        <div class="flex-grow relative">
+                            <canvas id="chart-onboard-monthly"></canvas>
+                        </div>
+                    </div>
+                    <!-- Attrition Rate by Dept Group -->
+                    <div class="bi-card p-5 rounded-xl flex flex-col h-[320px] bg-white">
+                        <h3 class="font-bold text-slate-700 text-sm mb-3">
+                            <i class="fa-solid fa-chart-column text-brand-rose mr-1.5"></i>Tỷ lệ nghỉ việc trong đào tạo theo Nhóm bộ phận (%)
+                        </h3>
+                        <div class="flex-grow relative">
+                            <canvas id="chart-attrition-dept"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chart Row 2 -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- Status Distribution -->
+                    <div class="bi-card p-5 rounded-xl flex flex-col h-[320px] bg-white">
+                        <h3 class="font-bold text-slate-700 text-sm mb-3">
+                            <i class="fa-solid fa-chart-pie text-brand-navy mr-1.5"></i>Cơ cấu kết quả các kỳ đào tạo của nhân viên mới
+                        </h3>
+                        <div class="flex-grow relative flex items-center justify-center">
+                            <canvas id="chart-status-pie"></canvas>
+                        </div>
+                    </div>
+                    <!-- New Dept-Based Breakdown -->
+                    <div class="bi-card p-5 rounded-xl flex flex-col h-[320px] bg-white">
+                        <h3 class="font-bold text-slate-700 text-sm mb-3">
+                            <i class="fa-solid fa-users-viewfinder text-brand-emerald mr-1.5"></i>Cơ cấu kết quả đào tạo Onboard theo Nhóm bộ phận
+                        </h3>
+                        <div class="flex-grow relative">
+                            <canvas id="chart-dept-onboard-breakdown"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ========================================== -->
+            <!-- TAB 2 CONTENT: LMS PERFORMANCE -->
+            <!-- ========================================== -->
+            <div id="tab2-content" class="hidden space-y-6">
+                <!-- LMS KPI row -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <!-- LMS KPI 1 -->
+                    <div class="bi-card p-5 rounded-xl flex items-center justify-between border-l-4 border-l-indigo-600 bg-white">
+                        <div>
+                            <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Tổng lượt học trên LMS</span>
+                            <h3 id="lms-kpi-registrations" class="text-2xl font-extrabold text-indigo-950 mt-1">0 lượt</h3>
+                        </div>
+                        <div class="w-11 h-11 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center text-lg shadow-sm">
+                            <i class="fa-solid fa-graduation-cap"></i>
+                        </div>
+                    </div>
+                    <!-- LMS KPI 2 -->
+                    <div class="bi-card p-5 rounded-xl flex items-center justify-between border-l-4 border-l-brand-emerald bg-white">
+                        <div>
+                            <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Tỷ lệ hoàn thành LMS</span>
+                            <h3 id="lms-kpi-complete-rate" class="text-2xl font-extrabold text-brand-emerald mt-1">0.00%</h3>
+                        </div>
+                        <div class="w-11 h-11 rounded-lg bg-emerald-50 text-brand-emerald flex items-center justify-center text-lg shadow-sm">
+                            <i class="fa-solid fa-square-check"></i>
+                        </div>
+                    </div>
+                    <!-- LMS KPI 3 -->
+                    <div class="bi-card p-5 rounded-xl flex items-center justify-between border-l-4 border-l-brand-rose bg-white">
+                        <div>
+                            <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Tỷ lệ thi trượt LMS</span>
+                            <h3 id="lms-kpi-fail-rate" class="text-2xl font-extrabold text-brand-rose mt-1">0.00%</h3>
+                        </div>
+                        <div class="w-11 h-11 rounded-lg bg-rose-50 text-brand-rose flex items-center justify-center text-lg shadow-sm">
+                            <i class="fa-solid fa-triangle-exclamation"></i>
+                        </div>
+                    </div>
+                    <!-- LMS KPI 4 -->
+                    <div class="bi-card p-5 rounded-xl flex items-center justify-between border-l-4 border-l-brand-accent bg-white">
+                        <div>
+                            <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Điểm thi trung bình LMS</span>
+                            <h3 id="lms-kpi-avg-score" class="text-2xl font-extrabold text-brand-accent mt-1">0.00</h3>
+                        </div>
+                        <div class="w-11 h-11 rounded-lg bg-amber-50 text-brand-accent flex items-center justify-center text-lg shadow-sm">
+                            <i class="fa-solid fa-star"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- LMS Analysis graphs -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- Method comparison (Scores) -->
+                    <div class="bi-card p-5 rounded-xl flex flex-col h-[320px] bg-white">
+                        <h3 class="font-bold text-slate-700 text-sm mb-3">
+                            <i class="fa-solid fa-sliders text-brand-navy mr-1.5"></i>So sánh Điểm số TB: LMS vs Giảng dạy trực tiếp
+                        </h3>
+                        <div class="flex-grow relative">
+                            <canvas id="chart-lms-vs-il"></canvas>
+                        </div>
+                    </div>
+                    <!-- LMS Score distribution histogram -->
+                    <div class="bi-card p-5 rounded-xl flex flex-col h-[320px] bg-white">
+                        <h3 class="font-bold text-slate-700 text-sm mb-3">
+                            <i class="fa-solid fa-chart-area text-brand-emerald mr-1.5"></i>Phân phối tần suất điểm thi bài khảo sát LMS
+                        </h3>
+                        <div class="flex-grow relative">
+                            <canvas id="chart-lms-histogram"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- LMS course-by-course Performance Summary -->
+                <div class="bi-card rounded-xl overflow-hidden bg-white">
+                    <div class="p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50">
+                        <div>
+                            <h3 class="font-bold text-brand-darkNavy text-sm"><i class="fa-solid fa-table-list text-brand-navy mr-1.5"></i>Hiệu suất chi tiết từng Khóa học số hóa trên hệ thống LMS</h3>
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-xs border-collapse">
+                            <thead>
+                                <tr class="bg-slate-100/80 text-slate-600 font-bold uppercase tracking-wider border-b border-slate-200">
+                                    <th class="p-4 pl-6">Tên khóa học trực tuyến</th>
+                                    <th class="p-4 text-center">Tổng lượt đăng ký</th>
+                                    <th class="p-4 text-center">Học viên duy nhất</th>
+                                    <th class="p-4 text-center">Tỷ lệ hoàn thành (%)</th>
+                                    <th class="p-4 text-right pr-6">Điểm số trung bình</th>
+                                </tr>
+                            </thead>
+                            <tbody id="lms-course-tbody" class="divide-y divide-slate-100 font-medium text-slate-700">
+                                <!-- JS inserts lines here dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ========================================== -->
+            <!-- TAB 3 CONTENT: ROADMAPS & LOOKUP -->
+            <!-- ========================================== -->
+            <div id="tab3-content" class="hidden space-y-6">
+                <!-- Pathways Charts (Completion rates by department) -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- Telesales Roadmap Completers chart -->
+                    <div class="bi-card p-5 rounded-xl flex flex-col h-[360px] bg-white">
+                        <h3 class="font-bold text-slate-700 text-sm mb-3">
+                            <i class="fa-solid fa-chart-line text-brand-accent mr-1.5"></i>Tỷ lệ hoàn thành lộ trình đào tạo theo phòng ban Telesales (TS) (%)
+                        </h3>
+                        <div class="flex-grow relative">
+                            <canvas id="chart-ts-roadmap"></canvas>
+                        </div>
+                    </div>
+                    <!-- Direct Sales Roadmap Completers chart -->
+                    <div class="bi-card p-5 rounded-xl flex flex-col h-[360px] bg-white">
+                        <h3 class="font-bold text-slate-700 text-sm mb-3">
+                            <i class="fa-solid fa-chart-line text-emerald-500 mr-1.5"></i>Tỷ lệ hoàn thành lộ trình đào tạo theo phòng ban Direct Sales (DS) (%)
+                        </h3>
+                        <div class="flex-grow relative">
+                            <canvas id="chart-ds-roadmap"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Searchable Individual Training History Lookup Profile -->
+                <div class="bi-card p-5 rounded-xl space-y-4 bg-white">
+                    <div>
+                        <h3 class="font-bold text-slate-700 text-sm"><i class="fa-solid fa-id-card text-brand-navy mr-1.5"></i>Tra cứu kết quả và lịch trình cá nhân của nhân sự mới</h3>
+                    </div>
+
+                    <!-- Input search control -->
+                    <div class="flex gap-2 max-w-md">
+                        <input type="text" id="lookup-input" placeholder="Ví dụ: BT00125, CT00531,..." class="flex-grow border border-slate-300 rounded-lg px-3.5 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-brand-navy font-semibold uppercase">
+                        <button onclick="executeLookup()" class="bg-brand-navy hover:bg-brand-darkNavy text-white font-bold px-5 py-2 rounded-lg text-xs transition flex items-center gap-1.5">
+                            <i class="fa-solid fa-magnifying-glass"></i> Tra cứu
+                        </button>
+                    </div>
+
+                    <!-- Results area -->
+                    <div id="lookup-result" class="hidden space-y-4 pt-2">
+                        <!-- Employee Meta Details Banner -->
+                        <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 flex flex-wrap gap-4 items-center justify-between">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-12 h-12 bg-blue-100 text-brand-navy rounded-full flex items-center justify-center font-bold text-base shadow-sm" id="lookup-avatar">
+                                    --
+                                </div>
+                                <div>
+                                    <h4 id="lookup-name" class="font-extrabold text-brand-darkNavy text-sm">--</h4>
+                                    <p id="lookup-code" class="text-[10px] text-slate-400 font-bold uppercase mt-0.5">Mã NV: --</p>
+                                </div>
+                            </div>
+                            <div class="flex flex-wrap gap-3 text-xs">
+                                <div class="bg-white py-1.5 px-3 rounded-lg border border-slate-200 shadow-sm text-center">
+                                    <span class="block text-[9px] text-slate-400 uppercase font-bold">Phòng ban</span>
+                                    <span id="lookup-dept" class="font-semibold text-slate-700">--</span>
+                                </div>
+                                <div class="bg-white py-1.5 px-3 rounded-lg border border-slate-200 shadow-sm text-center">
+                                    <span class="block text-[9px] text-slate-400 uppercase font-bold">Khối KD</span>
+                                    <span id="lookup-group" class="font-semibold text-slate-700">--</span>
+                                </div>
+                                <div class="bg-white py-1.5 px-3 rounded-lg border border-slate-200 shadow-sm text-center">
+                                    <span class="block text-[9px] text-slate-400 uppercase font-bold">Trạng thái cuối</span>
+                                    <span id="lookup-status" class="font-bold">--</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Transcript table -->
+                        <div class="border border-slate-200 rounded-xl overflow-hidden">
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-left text-xs border-collapse">
+                                    <thead>
+                                        <tr class="bg-slate-50 text-slate-600 font-bold border-b border-slate-200 uppercase tracking-wider">
+                                            <th class="p-3 pl-4">Ngày tổ chức</th>
+                                            <th class="p-3">Chương trình đào tạo</th>
+                                            <th class="p-3 text-center">Điểm số</th>
+                                            <th class="p-3 text-center">Kết quả gốc</th>
+                                            <th class="p-3 text-center">Kết quả chuẩn hóa</th>
+                                            <th class="p-3">Giảng viên</th>
+                                            <th class="p-3 pr-4">Hình thức đào tạo</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="lookup-tbody" class="divide-y divide-slate-100 font-medium text-slate-700">
+                                        <!-- JS inserts individual details here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Not found notice -->
+                    <div id="lookup-not-found" class="hidden p-6 text-center border-2 border-dashed border-slate-200 rounded-xl bg-slate-50">
+                        <i class="fa-regular fa-folder-open text-slate-300 text-3xl mb-2 block"></i>
+                        <h4 class="font-bold text-slate-600 text-xs">Không tìm thấy mã nhân viên tương ứng</h4>
+                        <p class="text-[11px] text-slate-400 mt-1">Đảm bảo nhập chính xác mã nhân viên (không phân biệt viết hoa/viết thường) như trong tệp dữ liệu đã nạp.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ========================================== -->
+            <!-- TAB 4 CONTENT: INSTRUCTORS & LECTURERS -->
+            <!-- ========================================== -->
+            <div id="tab4-content" class="hidden space-y-6">
+                <!-- KPI Row for Trainers (UPGRADED BASED ON USER DEFINITIONS) -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <!-- KPI 1: Số lượng training nội bộ -->
+                    <div class="bi-card p-4 rounded-lg text-center bg-white border border-slate-200 border-l-4 border-l-brand-navy">
+                        <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider block mb-1">Số lượng training nội bộ</span>
+                        <h2 id="trainer-kpi-internal-count" class="text-2xl md:text-3xl font-extrabold text-brand-darkNavy">0 lớp</h2>
+                        <span class="text-[10px] text-slate-400 font-medium block mt-1">Hình thức GV: Nội bộ / SM / Nguyên Hạo</span>
+                    </div>
+                    <!-- KPI 2: Số lượng giảng viên đào tạo -->
+                    <div class="bi-card p-4 rounded-lg text-center bg-white border border-slate-200 border-l-4 border-l-brand-accent">
+                        <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider block mb-1">Số lượng giảng viên đào tạo</span>
+                        <h2 id="trainer-kpi-direct-classes" class="text-2xl md:text-3xl font-extrabold text-brand-darkNavy">0 người</h2>
+                        <span class="text-[10px] text-slate-400 font-medium block mt-1">Thu Phương / Nhật Vi / Hoàng Sơn...</span>
+                    </div>
+                    <!-- KPI 3: Số lượng học qua LMS -->
+                    <div class="bi-card p-4 rounded-lg text-center bg-white border border-slate-200 border-l-4 border-l-indigo-600">
+                        <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider block mb-1">Số lượng học qua LMS</span>
+                        <h2 id="trainer-kpi-lms-learners" class="text-2xl md:text-3xl font-extrabold text-indigo-950">0 lượt</h2>
+                        <span class="text-[10px] text-slate-400 font-medium block mt-1">Hình thức học: E-Learning (LMS)</span>
+                    </div>
+                    <!-- KPI 4: Tỉ lệ phân bổ lượt học -->
+                    <div class="bi-card p-4 rounded-lg text-center bg-white border border-slate-200 border-l-4 border-l-brand-emerald">
+                        <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider block mb-1">Tỉ lệ phân bổ lượt học</span>
+                        <h2 id="trainer-kpi-lms-ratio" class="text-lg md:text-xl font-extrabold text-brand-emerald pt-1">0% vs 0%</h2>
+                        <span class="text-[10px] text-slate-400 font-medium block mt-1">Dạy trực tiếp vs E-Learning</span>
+                    </div>
+                </div>
+
+                <!-- Charts Row -->
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                    <!-- Left: Top Giảng Viên Nội Bộ Dạy Nhiều Lớp Nhất -->
+                    <div class="bi-card p-5 rounded-lg flex flex-col h-[350px] lg:col-span-7 bg-white">
+                        <h3 class="font-bold text-slate-700 text-sm mb-3">
+                            <i class="fa-solid fa-chalkboard-user text-brand-navy mr-1.5"></i>Xếp hạng Giảng viên đào tạo (Số lớp học đứng dạy)
+                        </h3>
+                        <div class="flex-grow relative">
+                            <canvas id="chart-trainer-top-classes"></canvas>
+                        </div>
+                    </div>
+                    
+                    <!-- Right: Phân bổ lớp học trực tiếp theo Module -->
+                    <div class="bi-card p-5 rounded-lg flex flex-col h-[350px] lg:col-span-5 bg-white">
+                        <h3 class="font-bold text-slate-700 text-sm mb-3">
+                            <i class="fa-solid fa-chart-pie text-brand-accent mr-1.5"></i>Cơ cấu phân bổ hình thức giảng dạy nội bộ
+                        </h3>
+                        <div class="flex-grow relative flex items-center justify-center">
+                            <canvas id="chart-trainer-module-pie"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Trainer Ranking & Performance Table -->
+                <div class="bi-card rounded-xl overflow-hidden bg-white">
+                    <div class="p-5 border-b border-slate-100 bg-slate-50">
+                        <h3 class="font-bold text-brand-darkNavy text-sm">
+                            <i class="fa-solid fa-users-rectangle text-brand-navy mr-1.5"></i>Bảng tổng hợp chi tiết hiệu suất giảng dạy giảng viên & hệ thống LMS
+                        </h3>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-xs border-collapse">
+                            <thead>
+                                <tr class="bg-slate-100/80 text-slate-600 font-bold uppercase tracking-wider border-b border-slate-200">
+                                    <th class="p-3 pl-6">Giảng viên / Hệ thống</th>
+                                    <th class="p-3 text-center">Phân loại hình thức</th>
+                                    <th class="p-3 text-center">Số chương trình dạy</th>
+                                    <th class="p-3 text-center">Số lớp đứng dạy</th>
+                                    <th class="p-3 text-center">Tổng lượt học viên</th>
+                                    <th class="p-3 text-center">Tỉ lệ hoàn thành (%)</th>
+                                    <th class="p-3 text-right pr-6">Điểm thi trung bình</th>
+                                </tr>
+                            </thead>
+                            <tbody id="trainer-summary-tbody" class="divide-y divide-slate-100 font-medium text-slate-700">
+                                <!-- JS outputs trainer data dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- DASHBOARD SCRIPTS & STATE CONTROL -->
+    <!-- ========================================== -->
+    <script>
+        let appState = {
+            isDataLoaded: false,
+            isUsingDemo: false,
+            rawData: [],         
+            filteredData: [],    
+            selectedMonths: new Set(),
+            selectedDepts: new Set(),
+            selectedSubjects: new Set(["Đang làm việc", "Nhân viên mới"]), 
+            activeTab: 'tab0',   
+            charts: {},          
+            fileName: ''
+        };
+
+        const dropzone = document.getElementById('dropzone');
+        const fileInput = document.getElementById('csv-file-input');
+
+        fileInput.addEventListener('change', handleFileSelect);
+        
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropzone.addEventListener(eventName, (e) => {
+                e.preventDefault();
+                dropzone.classList.add('border-brand-accent', 'bg-slate-800/80');
+            }, false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropzone.addEventListener(eventName, (e) => {
+                e.preventDefault();
+                dropzone.classList.remove('border-brand-accent', 'bg-slate-800/80');
+            }, false);
+        });
+
+        dropzone.addEventListener('drop', (e) => {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            if (files.length > 0) {
+                fileInput.files = files;
+                handleFileSelect();
+            }
+        });
+
+        function handleFileSelect() {
+            const file = fileInput.files[0];
+            if (!file) return;
+
+            appState.fileName = file.name;
+            document.getElementById('update-badge').innerText = `Đang đọc: ${file.name}...`;
+
+            Papa.parse(file, {
+                header: true,
+                skipEmptyLines: true,
+                complete: function(results) {
+                    processUploadedCSV(results.data);
+                },
+                error: function(err) {
+                    console.error("Lỗi đọc tệp CSV: ", err);
+                }
+            });
+        }
+
+        function loadMockData() {
+            const sampleData = [
+                // BT00125 - TSSGN1, Completed all 4 steps
+                { "Mã nhân viên": "BT00125", "Họ tên": "Nguyễn Văn An", "Phòng ban": "TSSGN1", "Tháng": "Tháng 01", "Tên chương trình": "Đào tạo hội nhập lớp 1", "Mã lớp": "LH-JAN-01", "Điểm": "95%", "Kết quả": "Pass", "Mã giảng viên": "GV01", "Giảng viên": "Thu Phương", "Nhóm trạng thái": "Đang làm việc", "Trạng thái làm việc": "Chính thức", "Vị trí": "Nhân viên Telesales", "Ngày tổ chức": "2026-01-05", "Module": "Văn hóa" },
+                { "Mã nhân viên": "BT00125", "Họ tên": "Nguyễn Văn An", "Phòng ban": "TSSGN1", "Tháng": "Tháng 01", "Tên chương trình": "Đào tạo sản phẩm KiotViet", "Mã lớp": "SP-LMS-01", "Điểm": "85%", "Kết quả": "Pass", "Mã giảng viên": "LMS", "Giảng viên": "E-Learning", "Nhóm trạng thái": "Đang làm việc", "Trạng thái làm việc": "Chính thức", "Vị trí": "Nhân viên Telesales", "Ngày tổ chức": "2026-01-10", "Module": "Chuyên môn" },
+                { "Mã nhân viên": "BT00125", "Họ tên": "Nguyễn Văn An", "Phòng ban": "TSSGN1", "Tháng": "Tháng 01", "Tên chương trình": "Quy trình COC - CRM", "Mã lớp": "CRM-LMS-01", "Điểm": "90%", "Kết quả": "Done", "Mã giảng viên": "LMS", "Giảng viên": "E-Learning", "Nhóm trạng thái": "Đang làm việc", "Trạng thái làm việc": "Chính thức", "Vị trí": "Nhân viên Telesales", "Ngày tổ chức": "2026-01-15", "Module": "Chuyên môn" },
+                { "Mã nhân viên": "BT00125", "Họ tên": "Nguyễn Văn An", "Phòng ban": "TSSGN1", "Tháng": "Tháng 01", "Tên chương trình": "Kỹ năng làm chủ cuộc gọi (Call Script)", "Mã lớp": "CS-DIR-01", "Điểm": "88%", "Kết quả": "Pass", "Mã giảng viên": "GV02", "Giảng viên": "Nhật Vi", "Nhóm trạng thái": "Đang làm việc", "Trạng thái làm việc": "Chính thức", "Vị trí": "Nhân viên Telesales", "Ngày tổ chức": "2026-01-20", "Module": "Kỹ năng" },
+
+                // CT00531 - DSHNI2, Completed 2/4 steps, Resigned in training
+                { "Mã nhân viên": "CT00531", "Họ tên": "Lê Hoàng Bách", "Phòng ban": "DSHNI2", "Tháng": "Tháng 01", "Tên chương trình": "Đào tạo hội nhập lớp 1", "Mã lớp": "LH-JAN-01", "Điểm": "82%", "Kết quả": "Pass", "Mã giảng viên": "GV03", "Giảng viên": "Hoàng Sơn", "Nhóm trạng thái": "Nghỉ việc", "Trạng thái làm việc": "Nghỉ việc", "Vị trí": "Nhân viên Direct Sales", "Ngày tổ chức": "2026-01-05", "Module": "Văn hóa" },
+                { "Mã nhân viên": "CT00531", "Họ tên": "Lê Hoàng Bách", "Phòng ban": "DSHNI2", "Tháng": "Tháng 01", "Tên chương trình": "Đào tạo sản phẩm KiotViet", "Mã lớp": "SP-LMS-01", "Điểm": "0%", "Kết quả": "OFFC", "Mã giảng viên": "LMS", "Giảng viên": "E-Learning", "Nhóm trạng thái": "Nghỉ việc", "Trạng thái làm việc": "Nghỉ việc", "Vị trí": "Nhân viên Direct Sales", "Ngày tổ chức": "2026-01-11", "Module": "Chuyên môn" },
+
+                // DT00222 - TSHNI4, Completed 4/4 steps
+                { "Mã nhân viên": "DT00222", "Họ tên": "Trần Thu Trang", "Phòng ban": "TSHNI4", "Tháng": "Tháng 02", "Tên chương trình": "Đào tạo hội nhập lớp 2", "Mã lớp": "LH-FEB-02", "Điểm": "90%", "Kết quả": "Pass", "Mã giảng viên": "GV01", "Giảng viên": "Thu Phương", "Nhóm trạng thái": "Đang làm việc", "Trạng thái làm việc": "Thử việc", "Vị trí": "Nhân viên Telesales", "Ngày tổ chức": "2026-02-05", "Module": "Văn hóa" },
+                { "Mã nhân viên": "DT00222", "Họ tên": "Trần Thu Trang", "Phòng ban": "TSHNI4", "Tháng": "Tháng 02", "Tên chương trình": "Đào tạo sản phẩm KiotViet", "Mã lớp": "SP-LMS-01", "Điểm": "85%", "Kết quả": "Pass", "Mã giảng viên": "LMS", "Giảng viên": "E-Learning", "Nhóm trạng thái": "Đang làm việc", "Trạng thái làm việc": "Thử việc", "Vị trí": "Nhân viên Telesales", "Ngày tổ chức": "2026-02-14", "Module": "Chuyên môn" },
+                { "Mã nhân viên": "DT00222", "Họ tên": "Trần Thu Trang", "Phòng ban": "TSHNI4", "Tháng": "Tháng 02", "Tên chương trình": "Quy trình COC - CRM", "Mã lớp": "CRM-LMS-01", "Điểm": "95%", "Kết quả": "Pass", "Mã giảng viên": "LMS", "Giảng viên": "E-Learning", "Nhóm trạng thái": "Đang làm việc", "Trạng thái làm việc": "Thử việc", "Vị trí": "Nhân viên Telesales", "Ngày tổ chức": "2026-02-18", "Module": "Chuyên môn" },
+                { "Mã nhân viên": "DT00222", "Họ tên": "Trần Thu Trang", "Phòng ban": "TSHNI4", "Tháng": "Tháng 02", "Tên chương trình": "Kỹ năng làm chủ cuộc gọi (Call Script)", "Mã lớp": "CS-DIR-01", "Điểm": "82%", "Kết quả": "Pass", "Mã giảng viên": "GV02", "Giảng viên": "Nhật Vi", "Nhóm trạng thái": "Đang làm việc", "Trạng thái làm việc": "Thử việc", "Vị trí": "Nhân viên Telesales", "Ngày tổ chức": "2026-02-22", "Module": "Kỹ năng" },
+
+                // ET00345 - PD01_PTSP, Completed 3/3 steps
+                { "Mã nhân viên": "ET00345", "Họ tên": "Phạm Minh Đức", "Phòng ban": "PD01_PTSP", "Tháng": "Tháng 03", "Tên chương trình": "Đào tạo hội nhập lớp 3", "Mã lớp": "LH-MAR-03", "Điểm": "88%", "Kết quả": "Pass", "Mã giảng viên": "GV03", "Giảng viên": "Hoàng Sơn", "Nhóm trạng thái": "Đang làm việc", "Trạng thái làm việc": "Chính thức", "Vị trí": "Developer", "Ngày tổ chức": "2026-03-05", "Module": "Văn hóa" },
+                { "Mã nhân viên": "ET00345", "Họ tên": "Phạm Minh Đức", "Phòng ban": "PD01_PTSP", "Tháng": "Tháng 03", "Tên chương trình": "Kiến trúc hệ thống KiotViet Core", "Mã lớp": "ARCH-01", "Điểm": "92%", "Kết quả": "Pass", "Mã giảng viên": "GV05", "Giảng viên": "Nguyên Hạo", "Nhóm trạng thái": "Đang làm việc", "Trạng thái làm việc": "Chính thức", "Vị trí": "Developer", "Ngày tổ chức": "2026-03-12", "Module": "PTSP" },
+                { "Mã nhân viên": "ET00345", "Họ tên": "Phạm Minh Đức", "Phòng ban": "PD01_PTSP", "Tháng": "Tháng 03", "Tên chương trình": "Quy trình CI-CD Agile Scrum", "Mã lớp": "AGILE-LMS-01", "Điểm": "98%", "Kết quả": "Pass", "Mã giảng viên": "LMS", "Giảng viên": "E-Learning", "Nhóm trạng thái": "Đang làm việc", "Trạng thái làm việc": "Chính thức", "Vị trí": "Developer", "Ngày tổ chức": "2026-03-20", "Module": "PTSP" },
+
+                // FT00401 - CS_DVKH, Completed 3/3 steps
+                { "Mã nhân viên": "FT00401", "Họ tên": "Hoàng Thị Mai", "Phòng ban": "CS_DVKH", "Tháng": "Tháng 04", "Tên chương trình": "Đào tạo hội nhập lớp 4", "Mã lớp": "LH-APR-04", "Điểm": "92%", "Kết quả": "Pass", "Mã giảng viên": "GV01", "Giảng viên": "Thu Phương", "Nhóm trạng thái": "Đang làm việc", "Trạng thái làm việc": "Chính thức", "Vị trí": "CS Specialist", "Ngày tổ chức": "2026-04-05", "Module": "Văn hóa" },
+                { "Mã nhân viên": "FT00401", "Họ tên": "Hoàng Thị Mai", "Phòng ban": "CS_DVKH", "Tháng": "Tháng 04", "Tên chương trình": "Kỹ năng lắng nghe & Giao tiếp DVKH", "Mã lớp": "KNDV-01", "Điểm": "90%", "Kết quả": "Pass", "Mã giảng viên": "GV04", "Giảng viên": "Linh Trang", "Nhóm trạng thái": "Đang làm việc", "Trạng thái làm việc": "Chính thức", "Vị trí": "CS Specialist", "Ngày tổ chức": "2026-04-12", "Module": "Kỹ năng" },
+                { "Mã nhân viên": "FT00401", "Họ tên": "Hoàng Thị Mai", "Phòng ban": "CS_DVKH", "Tháng": "Tháng 04", "Tên chương trình": "Xử lý khiếu nại khách hàng", "Mã lớp": "CS-LMS-02", "Điểm": "88%", "Kết quả": "Pass", "Mã giảng viên": "LMS", "Giảng viên": "E-Learning", "Nhóm trạng thái": "Đang làm việc", "Trạng thái làm việc": "Chính thức", "Vị trí": "CS Specialist", "Ngày tổ chức": "2026-04-20", "Module": "Kỹ năng" },
+
+                // GT00502 - CS_DVKH_HNI, Resigned in training
+                { "Mã nhân viên": "GT00502", "Họ tên": "Vũ Hoàng Long", "Phòng ban": "CS_DVKH_HNI", "Tháng": "Tháng 04", "Tên chương trình": "Đào tạo hội nhập lớp 4", "Mã lớp": "LH-APR-04", "Điểm": "84%", "Kết quả": "Pass", "Mã giảng viên": "GV01", "Giảng viên": "Thu Phương", "Nhóm trạng thái": "Nghỉ việc", "Trạng thái làm việc": "Nghỉ việc", "Vị trí": "CS Specialist", "Ngày tổ chức": "2026-04-05", "Module": "Văn hóa" },
+                { "Mã nhân viên": "GT00502", "Họ tên": "Vũ Hoàng Long", "Phòng ban": "CS_DVKH_HNI", "Tháng": "Tháng 04", "Tên chương trình": "Đào tạo sản phẩm KiotViet", "Mã lớp": "SP-LMS-01", "Điểm": "0%", "Kết quả": "OFFDS", "Mã giảng viên": "LMS", "Giảng viên": "E-Learning", "Nhóm trạng thái": "Nghỉ việc", "Trạng thái làm việc": "Nghỉ việc", "Vị trí": "CS Specialist", "Ngày tổ chức": "2026-04-12", "Module": "Chuyên môn" },
+
+                // HT00600 - MGT_MANAGER, Active
+                { "Mã nhân viên": "HT00600", "Họ tên": "Trần Văn Thắng", "Phòng ban": "MGT_MANAGER", "Tháng": "Tháng 05", "Tên chương trình": "Leadership Foundation KiotViet", "Mã lớp": "LEAD-01", "Điểm": "95%", "Kết quả": "Pass", "Mã giảng viên": "GV06", "Giảng viên": "SM Hải", "Nhóm trạng thái": "Đang làm việc", "Trạng thái làm việc": "Chính thức", "Vị trí": "Team Leader", "Ngày tổ chức": "2026-05-10", "Module": "Leadership" },
+                { "Mã nhân viên": "HT00600", "Họ tên": "Trần Văn Thắng", "Phòng ban": "MGT_MANAGER", "Tháng": "Tháng 05", "Tên chương trình": "Lập kế hoạch & Quản lý hiệu suất OKR", "Mã lớp": "OKR-LMS-01", "Điểm": "100%", "Kết quả": "Pass", "Mã giảng viên": "LMS", "Giảng viên": "E-Learning", "Nhóm trạng thái": "Đang làm việc", "Trạng thái làm việc": "Chính thức", "Vị trí": "Team Leader", "Ngày tổ chức": "2026-05-25", "Module": "Leadership" },
+
+                // JT00701 - TSSGN2, Completed 3/4 steps
+                { "Mã nhân viên": "JT00701", "Họ tên": "Lê Văn Đào", "Phòng ban": "TSSGN2", "Tháng": "Tháng 06", "Tên chương trình": "Đào tạo hội nhập lớp 5", "Mã lớp": "LH-JUN-05", "Điểm": "90%", "Kết quả": "Pass", "Mã giảng viên": "GV01", "Giảng viên": "Thu Phương", "Nhóm trạng thái": "Đang làm việc", "Trạng thái làm việc": "Học việc", "Vị trí": "Nhân viên Telesales", "Ngày tổ chức": "2026-06-02", "Module": "Văn hóa" },
+                { "Mã nhân viên": "JT00701", "Họ tên": "Lê Văn Đào", "Phòng ban": "TSSGN2", "Tháng": "Tháng 06", "Tên chương trình": "Đào tạo sản phẩm KiotViet", "Mã lớp": "SP-LMS-01", "Điểm": "80%", "Kết quả": "Pass", "Mã giảng viên": "LMS", "Giảng viên": "E-Learning", "Nhóm trạng thái": "Đang làm việc", "Trạng thái làm việc": "Học việc", "Vị trí": "Nhân viên Telesales", "Ngày tổ chức": "2026-06-10", "Module": "Chuyên môn" },
+                { "Mã nhân viên": "JT00701", "Họ tên": "Lê Văn Đào", "Phòng ban": "TSSGN2", "Tháng": "Tháng 06", "Tên chương trình": "Quy trình COC - CRM", "Mã lớp": "CRM-LMS-01", "Điểm": "75%", "Kết quả": "Pass", "Mã giảng viên": "LMS", "Giảng viên": "E-Learning", "Nhóm trạng thái": "Đang làm việc", "Trạng thái làm việc": "Học việc", "Vị trí": "Nhân viên Telesales", "Ngày tổ chức": "2026-06-15", "Module": "Chuyên môn" },
+
+                // JT00702 - DSHNI3, Completed 2/4 steps
+                { "Mã nhân viên": "JT00702", "Họ tên": "Phạm Quốc Toản", "Phòng ban": "DSHNI3", "Tháng": "Tháng 06", "Tên chương trình": "Đào tạo hội nhập lớp 5", "Mã lớp": "LH-JUN-05", "Điểm": "80%", "Kết quả": "Pass", "Mã giảng viên": "GV01", "Giảng viên": "Thu Phương", "Nhóm trạng thái": "Đang làm việc", "Trạng thái làm việc": "Học việc", "Vị trí": "Nhân viên Direct Sales", "Ngày tổ chức": "2026-06-02", "Module": "Văn hóa" },
+                { "Mã nhân viên": "JT00702", "Họ tên": "Phạm Quốc Toản", "Phòng ban": "DSHNI3", "Tháng": "Tháng 06", "Tên chương trình": "Đào tạo sản phẩm KiotViet", "Mã lớp": "SP-LMS-01", "Điểm": "70%", "Kết quả": "Pass", "Mã giảng viên": "LMS", "Giảng viên": "E-Learning", "Nhóm trạng thái": "Đang làm việc", "Trạng thái làm việc": "Học việc", "Vị trí": "Nhân viên Direct Sales", "Ngày tổ chức": "2026-06-12", "Module": "Chuyên môn" }
+            ];
+
+            appState.fileName = "H1.2026_demo_data.csv";
+            processUploadedCSV(sampleData, true);
+        }
+
+        function processUploadedCSV(rows, isDemo = false) {
+            if (!rows || rows.length === 0) return;
+
+            let cleanedRows = rows.map(row => {
+                let norm = {};
+                for (let k in row) {
+                    if (row.hasOwnProperty(k)) {
+                        norm[k.trim()] = row[k] ? String(row[k]).trim() : '';
+                    }
+                }
+
+                // 1. Phân nhóm phòng ban (Sales TS/DS, CS, PTSP, Khác)
+                let deptVal = (norm["Phòng ban"] || norm["Phong ban"] || "").trim();
+                let deptUpper = deptVal.toUpperCase();
+                let deptGroup = "Khác";
+
+                if (deptUpper.startsWith("TS") || deptUpper.startsWith("DS")) {
+                    deptGroup = "Sales (TS/DS)";
+                } else if (deptUpper.startsWith("CS") || deptUpper.includes("DVKH") || deptUpper.includes("CUSTOMER SERVICE")) {
+                    deptGroup = "DVKH (Customer Service)";
+                } else if (deptUpper.startsWith("PD") || deptUpper.includes("PTSP") || deptUpper.includes("PRODUCT DEVELOPMENT")) {
+                    deptGroup = "PTSP";
+                }
+                norm["Nhóm Bộ Phận"] = deptGroup;
+
+                let programName = (norm["Tên chương trình"] || norm["Ten chuong trinh"] || "").toLowerCase();
+                norm["Is_Onboard_Participant"] = programName.includes("hội nhập");
+
+                let scoreVal = norm["Điểm"] || norm["Diem"] || "";
+                norm["Score_Numeric"] = cleanScore(scoreVal);
+
+                // 2. Chuẩn hóa kết quả theo định nghĩa
+                let rawRes = (norm["Kết quả"] || norm["Ket qua"] || "").toUpperCase();
+                let stdRes = "Khác";
+                if (['PASS', 'DONE', 'PASS(2)', 'PASS (2)', 'ĐẠT'].includes(rawRes)) {
+                    stdRes = "Đã hoàn thành";
+                } else if (['FAIL', 'FAIL(2)', 'FAIL (2)', 'MISS(2)', 'MISS (2)', 'OFF', 'CHƯA ĐẠT'].includes(rawRes)) {
+                    stdRes = "Thi trượt / Chưa đạt";
+                } else if (['OFFC', 'OFFW', 'OFFP', 'OFFCS', 'OFFDS'].includes(rawRes)) {
+                    stdRes = "Nghỉ việc trong đào tạo";
+                }
+                norm["Kết quả nhóm"] = stdRes;
+
+                // 3. Phân loại Module (Đọc từ cột "Module" trước)
+                let modVal = (norm["Module"] || norm["module"] || "").trim();
+                let catCourse = "Khác";
+                
+                if (modVal) {
+                    let mv = modVal.toUpperCase();
+                    if (mv.includes("CHUYÊN MÔN") || mv.includes("CHUYEN MON")) {
+                        catCourse = "Chuyên môn";
+                    } else if (mv.includes("KỸ NĂNG") || mv.includes("KY NANG")) {
+                        catCourse = "Kỹ năng";
+                    } else if (mv.includes("VĂN HÓA") || mv.includes("VAN HOA") || mv.includes("HỘI NHẬP") || mv.includes("HOI NHAP")) {
+                        catCourse = "Văn hóa";
+                    } else if (mv.includes("PTSP") || mv.includes("PHÁT TRIỂN SẢN PHẨM") || mv.includes("PHAT TRIEN SAN PHAM")) {
+                        catCourse = "PTSP";
+                    } else if (mv.includes("LEADERSHIP") || mv.includes("QUẢN LÝ") || mv.includes("QUAN LY") || mv.includes("LÃNH ĐẠO") || mv.includes("LANH DAO")) {
+                        catCourse = "Leadership";
+                    } else {
+                        catCourse = "Khác";
+                    }
+                } else {
+                    // Trích xuất dự phòng
+                    if (programName.includes("hội nhập") || programName.includes("văn hóa")) {
+                        catCourse = "Văn hóa";
+                    } else if (programName.includes("kỹ năng") || programName.includes("call script") || programName.includes("cuộc gọi")) {
+                        catCourse = "Kỹ năng";
+                    } else if (programName.includes("leadership") || programName.includes("quản lý") || programName.includes("lãnh đạo")) {
+                        catCourse = "Leadership";
+                    } else if (programName.includes("ptsp") || programName.includes("phát triển sản phẩm") || deptGroup === "PTSP") {
+                        catCourse = "PTSP";
+                    } else if (programName.includes("sản phẩm") || programName.includes("tính năng") || programName.includes("coc - crm")) {
+                        catCourse = "Chuyên môn";
+                    }
+                }
+                norm["Phân loại Module"] = catCourse;
+
+                // 4. Định hình hình thức giảng viên / LMS
+                let trainCode = (norm["Mã giảng viên"] || norm["Ma giang vien"] || "").toUpperCase();
+                let trainName = (norm["Giảng viên"] || norm["Giang vien"] || "").toUpperCase();
+                
+                norm["Is_LMS"] = (trainCode === 'LMS' || trainName === 'E-LEARNING' || trainName === 'E_LEARNING' || trainName.includes('LMS'));
+                norm["Hình thức ĐT"] = norm["Is_LMS"] ? "E-Learning (LMS)" : "Trực tiếp (Instructor-Led)";
+
+                // Phân loại hình thức giảng viên: Nội bộ / SM / Nguyên Hạo
+                let trainerClassification = "Khác";
+                if (norm["Is_LMS"]) {
+                    trainerClassification = "E-Learning (LMS)";
+                } else {
+                    if (trainName.includes("SM")) {
+                        trainerClassification = "SM";
+                    } else if (trainName.includes("NGUYÊN HẠO") || trainName.includes("NGUYEN HAO")) {
+                        trainerClassification = "Nguyên Hạo";
+                    } else {
+                        trainerClassification = "Nội bộ";
+                    }
+                }
+                norm["Hình thức Giảng viên"] = trainerClassification;
+
+                return norm;
+            }).filter(r => r["Mã nhân viên"] && r["Tên chương trình"]);
+
+            appState.rawData = cleanedRows;
+            appState.isDataLoaded = true;
+            appState.isUsingDemo = isDemo;
+
+            const statText = document.getElementById('upload-status-text');
+            statText.innerText = `Đã nạp ${cleanedRows.length} bản ghi`;
+            document.getElementById('upload-status').classList.remove('hidden');
+            document.getElementById('landing-notification').classList.add('hidden');
+            document.getElementById('main-dashboard-tabs').classList.remove('hidden');
+            document.getElementById('update-badge').innerText = `Nguồn: ${appState.fileName}`;
+            if (isDemo) {
+                document.getElementById('update-badge').className = "font-semibold text-amber-800";
+            } else {
+                document.getElementById('update-badge').className = "font-semibold text-brand-navy";
+            }
+
+            buildFilterOptions();
+            applyFiltersAndRender();
+        }
+
+        function cleanScore(val) {
+            if (!val) return null;
+            let s = String(val).trim();
+            if (s.endsWith('%')) {
+                let parsed = parseFloat(s.replace('%', ''));
+                return isNaN(parsed) ? null : parsed;
+            }
+            let n = parseFloat(s);
+            if (isNaN(n)) return null;
+            if (n > 0 && n <= 1.0) return n * 100;
+            return n;
+        }
+
+        function buildFilterOptions() {
+            const months = [...new Set(appState.rawData.map(r => r["Tháng"]).filter(Boolean))].sort();
+            const depts = ["Sales (TS/DS)", "DVKH (Customer Service)", "PTSP", "Khác"];
+
+            appState.selectedMonths = new Set(months);
+            appState.selectedDepts = new Set(depts);
+
+            const monthDiv = document.getElementById('filter-months');
+            monthDiv.innerHTML = months.map(m => `
+                <label class="flex items-center space-x-2 text-slate-300 hover:text-white cursor-pointer py-0.5">
+                    <input type="checkbox" value="${m}" checked onchange="toggleFilter('month', this)" class="rounded border-slate-600 text-brand-accent focus:ring-brand-accent bg-slate-800 w-3.5 h-3.5">
+                    <span>${m}</span>
+                </label>
+            `).join('');
+
+            const deptDiv = document.getElementById('filter-depts');
+            deptDiv.innerHTML = depts.map(d => `
+                <label class="flex items-center space-x-2 text-slate-300 hover:text-white cursor-pointer py-0.5">
+                    <input type="checkbox" value="${d}" checked onchange="toggleFilter('dept', this)" class="rounded border-slate-600 text-brand-accent focus:ring-brand-accent bg-slate-800 w-3.5 h-3.5">
+                    <span>${d}</span>
+                </label>
+            `).join('');
+        }
+
+        function toggleFilter(type, el) {
+            const val = el.value;
+            const checked = el.checked;
+
+            if (type === 'month') {
+                checked ? appState.selectedMonths.add(val) : appState.selectedMonths.delete(val);
+            } else if (type === 'dept') {
+                checked ? appState.selectedDepts.add(val) : appState.selectedDepts.delete(val);
+            } else if (type === 'subject') {
+                checked ? appState.selectedSubjects.add(val) : appState.selectedSubjects.delete(val);
+            }
+
+            applyFiltersAndRender();
+        }
+
+        function resetFilters() {
+            if (!appState.isDataLoaded) return;
+            buildFilterOptions();
+            const subCheckboxes = document.querySelectorAll('#filter-subjects input');
+            subCheckboxes.forEach(cb => {
+                cb.checked = true;
+                appState.selectedSubjects.add(cb.value);
+            });
+            applyFiltersAndRender();
+        }
+
+        function applyFiltersAndRender() {
+            appState.filteredData = appState.rawData.filter(row => {
+                const monthMatch = appState.selectedMonths.has(row["Tháng"]);
+                const deptMatch = appState.selectedDepts.has(row["Nhóm Bộ Phận"]);
+
+                let isParticipantNew = row["Is_Onboard_Participant"];
+                let subjectMatch = false;
+                if (appState.selectedSubjects.has("Đang làm việc") && !isParticipantNew) {
+                    subjectMatch = true;
+                }
+                if (appState.selectedSubjects.has("Nhân viên mới") && isParticipantNew) {
+                    subjectMatch = true;
+                }
+
+                return monthMatch && deptMatch && subjectMatch;
+            });
+
+            renderDashboard();
+        }
+
+        function renderDashboard() {
+            if (!appState.isDataLoaded) return;
+            
+            document.getElementById('tab0-content').classList.add('hidden');
+            document.getElementById('tab1-content').classList.add('hidden');
+            document.getElementById('tab2-content').classList.add('hidden');
+            document.getElementById('tab3-content').classList.add('hidden');
+            document.getElementById('tab4-content').classList.add('hidden');
+            document.getElementById(`${appState.activeTab}-content`).classList.remove('hidden');
+
+            if (appState.activeTab === 'tab0') {
+                calculateAndRenderTab0();
+            } else if (appState.activeTab === 'tab1') {
+                calculateAndRenderTab1();
+            } else if (appState.activeTab === 'tab2') {
+                calculateAndRenderTab2();
+            } else if (appState.activeTab === 'tab3') {
+                calculateAndRenderTab3();
+            } else if (appState.activeTab === 'tab4') {
+                calculateAndRenderTab4();
+            }
+        }
+
+        function switchTab(tabId) {
+            appState.activeTab = tabId;
+            document.getElementById('btn-tab0').classList.remove('active-tab');
+            document.getElementById('btn-tab1').classList.remove('active-tab');
+            document.getElementById('btn-tab2').classList.remove('active-tab');
+            document.getElementById('btn-tab3').classList.remove('active-tab');
+            document.getElementById('btn-tab4').classList.remove('active-tab');
+
+            document.getElementById(`btn-${tabId}`).classList.add('active-tab');
+            renderDashboard();
+        }
+
+        function cleanupChart(chartKey) {
+            if (appState.charts[chartKey]) {
+                appState.charts[chartKey].destroy();
+                delete appState.charts[chartKey];
+            }
+        }
+
+        function calculateAndRenderTab0() {
+            const uniqueTrainees = [...new Set(appState.filteredData.map(r => r["Mã nhân viên"]))];
+            document.getElementById('tab0-kpi-nv').innerText = uniqueTrainees.length.toLocaleString('vi-VN');
+
+            const uniquePrograms = [...new Set(appState.filteredData.map(r => r["Tên chương trình"]))].length;
+            document.getElementById('tab0-kpi-chuongtrinh').innerText = uniquePrograms.toLocaleString('vi-VN');
+
+            const uniqueClassCodes = [...new Set(appState.filteredData.map(r => r["Mã lớp"]).filter(Boolean))].length;
+            document.getElementById('tab0-kpi-malop').innerText = uniqueClassCodes.toLocaleString('vi-VN');
+
+            const uniqueDeptsCount = [...new Set(appState.filteredData.map(r => r["Nhóm Bộ Phận"]).filter(Boolean))].length;
+            document.getElementById('tab0-kpi-trangthai').innerText = uniqueDeptsCount.toLocaleString('vi-VN');
+
+            let catCounts = { "Chuyên môn": 0, "Kỹ năng": 0, "Văn hóa": 0, "PTSP": 0, "Leadership": 0, "Khác": 0 };
+            
+            const courseCategoryMap = {};
+            appState.filteredData.forEach(row => {
+                let course = row["Tên chương trình"];
+                let cat = row["Phân loại Module"] || "Khác";
+                courseCategoryMap[course] = cat;
+            });
+
+            Object.values(courseCategoryMap).forEach(cat => {
+                if (catCounts.hasOwnProperty(cat)) {
+                    catCounts[cat]++;
+                }
+            });
+
+            document.getElementById('tab0-sub-chuyenmon').innerText = catCounts["Chuyên môn"];
+            document.getElementById('tab0-sub-kynang').innerText = catCounts["Kỹ năng"];
+            document.getElementById('tab0-sub-vanhoa').innerText = catCounts["Văn hóa"];
+            document.getElementById('tab0-sub-ptsp').innerText = catCounts["PTSP"];
+            document.getElementById('tab0-sub-leader').innerText = catCounts["Leadership"];
+            document.getElementById('tab0-sub-khac').innerText = catCounts["Khác"];
+
+            // Pie chart: Nhóm bộ phận
+            cleanupChart('tab0StatusPie');
+            
+            const traineeDeptGroupMap = {};
+            appState.filteredData.forEach(row => {
+                traineeDeptGroupMap[row["Mã nhân viên"]] = row["Nhóm Bộ Phận"] || "Khác";
+            });
+
+            const deptDistribution = {
+                "Sales (TS/DS)": 0,
+                "DVKH (Customer Service)": 0,
+                "PTSP": 0,
+                "Khác": 0
+            };
+
+            Object.values(traineeDeptGroupMap).forEach(deptGroup => {
+                if (deptDistribution.hasOwnProperty(deptGroup)) {
+                    deptDistribution[deptGroup]++;
+                } else {
+                    deptDistribution["Khác"]++;
+                }
+            });
+
+            const deptLabels = Object.keys(deptDistribution);
+            const deptValues = Object.values(deptDistribution);
+
+            const ctxPie0 = document.getElementById('chart-tab0-status-pie').getContext('2d');
+            appState.charts.tab0StatusPie = new Chart(ctxPie0, {
+                type: 'doughnut',
+                data: {
+                    labels: deptLabels,
+                    datasets: [{
+                        data: deptValues,
+                        backgroundColor: ['#1E3E7C', '#06B6D4', '#10B981', '#6B7280'],
+                        borderWidth: 1.5,
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: { boxWidth: 12, font: { size: 10, weight: 'semibold' } }
+                        }
+                    },
+                    cutout: '45%'
+                }
+            });
+
+            // Horizontal bar chart: Nhóm bộ phận theo tháng
+            cleanupChart('tab0MonthlyStatus');
+            const dfNewParticipants = appState.filteredData.filter(row => row["Is_Onboard_Participant"]);
+            
+            const monthDeptMap = {};
+            const monthsFound = new Set();
+            const targetDepts = ["Sales (TS/DS)", "DVKH (Customer Service)", "PTSP", "Khác"];
+
+            dfNewParticipants.forEach(row => {
+                let m = row["Tháng"] || "Khác";
+                let d = row["Nhóm Bộ Phận"] || "Khác";
+                let id = row["Mã nhân viên"];
+
+                monthsFound.add(m);
+
+                if (!monthDeptMap[m]) monthDeptMap[m] = {};
+                if (!monthDeptMap[m][d]) monthDeptMap[m][d] = new Set();
+                monthDeptMap[m][d].add(id);
+            });
+
+            const sortedMonths = [...monthsFound].sort();
+            
+            const colorPaletteMap = {
+                "Sales (TS/DS)": "#1E3E7C",
+                "DVKH (Customer Service)": "#06B6D4",
+                "PTSP": "#10B981",
+                "Khác": "#6B7280"
+            };
+
+            const datasets = targetDepts.map(dept => {
+                return {
+                    label: dept,
+                    data: sortedMonths.map(m => (monthDeptMap[m] && monthDeptMap[m][dept] ? monthDeptMap[m][dept].size : 0)),
+                    backgroundColor: colorPaletteMap[dept] || "#94A3B8"
+                };
+            });
+
+            const ctxBar0 = document.getElementById('chart-tab0-new-monthly-status').getContext('2d');
+            appState.charts.tab0MonthlyStatus = new Chart(ctxBar0, {
+                type: 'bar',
+                data: {
+                    labels: sortedMonths,
+                    datasets: datasets
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: { stacked: true, beginAtZero: true, grid: { color: '#F1F5F9' } },
+                        y: { stacked: true, grid: { display: false } }
+                    },
+                    plugins: {
+                        legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } }
+                    }
+                }
+            });
+        }
+
+        function calculateAndRenderTab1() {
+            const dfOnboard = appState.filteredData.filter(row => row["Is_Onboard_Participant"]);
+            const uniqueOnboardIds = [...new Set(dfOnboard.map(r => r["Mã nhân viên"]))];
+            const onboardCount = uniqueOnboardIds.length;
+
+            const historyOnboard = appState.rawData.filter(row => uniqueOnboardIds.includes(row["Mã nhân viên"]));
+
+            const dropoutIds = [...new Set(historyOnboard.filter(row => row["Kết quả nhóm"] === "Nghỉ việc trong đào tạo").map(row => row["Mã nhân viên"]))];
+            const dropoutCount = dropoutIds.length;
+            const dropoutRate = onboardCount > 0 ? (dropoutCount / onboardCount * 100) : 0;
+
+            const passedOnboardCount = [...new Set(dfOnboard.filter(row => row["Kết quả nhóm"] === "Đã hoàn thành").map(r => r["Mã nhân viên"]))].length;
+            const classesCount = [...new Set(dfOnboard.map(r => r["Mã lớp"]).filter(Boolean))].length;
+
+            document.getElementById('kpi-onboard-count').innerText = `${onboardCount} người`;
+            document.getElementById('kpi-dropout-count').innerText = `${dropoutCount} người`;
+            document.getElementById('kpi-dropout-rate').innerText = `Tỷ lệ: ${dropoutRate.toFixed(2)}%`;
+            document.getElementById('kpi-passed-count').innerText = `${passedOnboardCount} người`;
+            document.getElementById('kpi-classes-count').innerText = `${classesCount} lớp`;
+
+            // Onboard monthly
+            cleanupChart('onboardMonthly');
+            const monthlyStats = {};
+            dfOnboard.forEach(row => {
+                let m = row["Tháng"] || "Khác";
+                monthlyStats[m] = monthlyStats[m] || new Set();
+                monthlyStats[m].add(row["Mã nhân viên"]);
+            });
+
+            const monthLabels = Object.keys(monthlyStats).sort();
+            const monthCounts = monthLabels.map(m => monthlyStats[m].size);
+
+            const ctx1 = document.getElementById('chart-onboard-monthly').getContext('2d');
+            appState.charts.onboardMonthly = new Chart(ctx1, {
+                type: 'bar',
+                data: {
+                    labels: monthLabels,
+                    datasets: [{
+                        label: 'Số nhân sự Onboard mới',
+                        data: monthCounts,
+                        backgroundColor: '#1E3E7C',
+                        borderRadius: 6,
+                        maxBarThickness: 32
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { beginAtZero: true, grid: { color: '#E2E8F0' }, ticks: { stepSize: 1, precision: 0 } },
+                        x: { grid: { display: false } }
+                    }
+                }
+            });
+
+            // Attrition rate by dept group
+            cleanupChart('attritionDept');
+            const deptStats = {};
+            historyOnboard.forEach(row => {
+                let d = row["Nhóm Bộ Phận"] || "Khác";
+                if (!deptStats[d]) {
+                    deptStats[d] = { total: new Set(), dropped: new Set() };
+                }
+                deptStats[d].total.add(row["Mã nhân viên"]);
+                if (row["Kết quả nhóm"] === "Nghỉ việc trong đào tạo") {
+                    deptStats[d].dropped.add(row["Mã nhân viên"]);
+                }
+            });
+
+            const deptLabels = Object.keys(deptStats).sort();
+            const deptRates = deptLabels.map(d => {
+                let info = deptStats[d];
+                return info.total.size > 0 ? parseFloat((info.dropped.size / info.total.size * 100).toFixed(2)) : 0;
+            });
+
+            const ctx2 = document.getElementById('chart-attrition-dept').getContext('2d');
+            appState.charts.attritionDept = new Chart(ctx2, {
+                type: 'bar',
+                data: {
+                    labels: deptLabels,
+                    datasets: [{
+                        label: 'Tỷ lệ nghỉ việc (%)',
+                        data: deptRates,
+                        backgroundColor: ['#EF4444', '#1E3E7C', '#06B6D4', '#6B7280'],
+                        borderRadius: 6,
+                        maxBarThickness: 45
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { beginAtZero: true, max: 100, grid: { color: '#E2E8F0' } },
+                        x: { grid: { display: false } }
+                    }
+                }
+            });
+
+            // Status Pie Chart
+            cleanupChart('statusPie');
+            const resCounts = { "Đã hoàn thành": 0, "Thi trượt / Chưa đạt": 0, "Nghỉ việc trong đào tạo": 0, "Khác": 0 };
+            dfOnboard.forEach(row => {
+                let grp = row["Kết quả nhóm"];
+                if (resCounts.hasOwnProperty(grp)) {
+                    resCounts[grp]++;
+                }
+            });
+
+            const resLabels = Object.keys(resCounts);
+            const resValues = Object.values(resCounts);
+
+            const ctx3 = document.getElementById('chart-status-pie').getContext('2d');
+            appState.charts.statusPie = new Chart(ctx3, {
+                type: 'doughnut',
+                data: {
+                    labels: resLabels,
+                    datasets: [{
+                        data: resValues,
+                        backgroundColor: ['#10B981', '#F59E0B', '#EF4444', '#94A3B8'],
+                        borderWidth: 2,
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                            labels: { boxWidth: 12, font: { size: 10 } }
+                        }
+                    },
+                    cutout: '55%'
+                }
+            });
+
+            // Stacked Bar Onboarding status by department
+            cleanupChart('deptOnboardBreakdown');
+            const deptBreakdownStats = {};
+            const uniqueResults = ["Đã hoàn thành", "Thi trượt / Chưa đạt", "Nghỉ việc trong đào tạo"];
+            const deptOnboardLabels = ["Sales (TS/DS)", "DVKH (Customer Service)", "PTSP", "Khác"];
+
+            deptOnboardLabels.forEach(d => {
+                deptBreakdownStats[d] = { "Đã hoàn thành": 0, "Thi trượt / Chưa đạt": 0, "Nghỉ việc trong đào tạo": 0, "Khác": 0 };
+            });
+
+            dfOnboard.forEach(row => {
+                let d = row["Nhóm Bộ Phận"] || "Khác";
+                let grp = row["Kết quả nhóm"];
+                if (!uniqueResults.includes(grp)) grp = "Khác";
+
+                if (deptBreakdownStats[d]) {
+                    deptBreakdownStats[d][grp]++;
+                }
+            });
+
+            const colorsMap = {
+                "Đã hoàn thành": "#10B981",
+                "Thi trượt / Chưa đạt": "#F59E0B",
+                "Nghỉ việc trong đào tạo": "#EF4444",
+                "Khác": "#94A3B8"
+            };
+
+            const stackDatasets = Object.keys(colorsMap).map(key => {
+                return {
+                    label: key,
+                    data: deptOnboardLabels.map(d => deptBreakdownStats[d][key] || 0),
+                    backgroundColor: colorsMap[key]
+                };
+            });
+
+            const ctx4 = document.getElementById('chart-dept-onboard-breakdown').getContext('2d');
+            appState.charts.deptOnboardBreakdown = new Chart(ctx4, {
+                type: 'bar',
+                data: {
+                    labels: deptOnboardLabels,
+                    datasets: stackDatasets
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: { stacked: true, grid: { display: false } },
+                        y: { stacked: true, beginAtZero: true, grid: { color: '#E2E8F0' } }
+                    },
+                    plugins: {
+                        legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } }
+                    }
+                }
+            });
+        }
+
+        function calculateAndRenderTab2() {
+            const dfLms = appState.filteredData.filter(row => row["Is_LMS"] === true);
+            const totalLms = dfLms.length;
+
+            const completedLms = dfLms.filter(row => row["Kết quả nhóm"] === "Đã hoàn thành").length;
+            const failedLms = dfLms.filter(row => row["Kết quả nhóm"] === "Thi trượt / Chưa đạt").length;
+
+            const lmsCompleteRate = totalLms > 0 ? (completedLms / totalLms * 100) : 0;
+            const lmsFailRate = totalLms > 0 ? (failedLms / totalLms * 100) : 0;
+
+            const scoredRows = dfLms.filter(row => row["Score_Numeric"] !== null && row["Score_Numeric"] > 0);
+            const avgScoreLms = scoredRows.length > 0 ? (scoredRows.reduce((sum, r) => sum + r["Score_Numeric"], 0) / scoredRows.length) : 0;
+
+            document.getElementById('lms-kpi-registrations').innerText = `${totalLms} lượt`;
+            document.getElementById('lms-kpi-complete-rate').innerText = `${lmsCompleteRate.toFixed(2)}%`;
+            document.getElementById('lms-kpi-fail-rate').innerText = `${lmsFailRate.toFixed(2)}%`;
+            document.getElementById('lms-kpi-avg-score').innerText = `${avgScoreLms.toFixed(1)}/100`;
+
+            // Score LMS vs direct comparison
+            cleanupChart('lmsVsIl');
+            const typeScores = { "E-Learning (LMS)": { sum: 0, count: 0 }, "Trực tiếp (Instructor-Led)": { sum: 0, count: 0 } };
+            appState.filteredData.forEach(row => {
+                let typ = row["Hình thức ĐT"];
+                let sc = row["Score_Numeric"];
+                if (sc !== null && sc > 0 && typeScores[typ]) {
+                    typeScores[typ].sum += sc;
+                    typeScores[typ].count++;
+                }
+            });
+
+            const methodLabels = Object.keys(typeScores);
+            const methodScores = methodLabels.map(m => {
+                let data = typeScores[m];
+                return data.count > 0 ? parseFloat((data.sum / data.count).toFixed(1)) : 0;
+            });
+
+            const ctxVs = document.getElementById('chart-lms-vs-il').getContext('2d');
+            appState.charts.lmsVsIl = new Chart(ctxVs, {
+                type: 'bar',
+                data: {
+                    labels: methodLabels,
+                    datasets: [{
+                        label: 'Điểm trung bình',
+                        data: methodScores,
+                        backgroundColor: ['#6366F1', '#F59E0B'],
+                        borderRadius: 6,
+                        maxBarThickness: 45
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { beginAtZero: true, max: 100, grid: { color: '#E2E8F0' } },
+                        x: { grid: { display: false } }
+                    }
+                }
+            });
+
+            // Histogram score distribution
+            cleanupChart('lmsHistogram');
+            const buckets = { "0-49": 0, "50-59": 0, "60-69": 0, "70-79": 0, "80-89": 0, "90-100": 0 };
+            scoredRows.forEach(row => {
+                let sc = row["Score_Numeric"];
+                if (sc < 50) buckets["0-49"]++;
+                else if (sc < 60) buckets["50-59"]++;
+                else if (sc < 70) buckets["60-69"]++;
+                else if (sc < 80) buckets["70-79"]++;
+                else if (sc < 90) buckets["80-89"]++;
+                else buckets["90-100"]++;
+            });
+
+            const bucketLabels = Object.keys(buckets);
+            const bucketValues = Object.values(buckets);
+
+            const ctxHist = document.getElementById('chart-lms-histogram').getContext('2d');
+            appState.charts.lmsHistogram = new Chart(ctxHist, {
+                type: 'bar',
+                data: {
+                    labels: bucketLabels,
+                    datasets: [{
+                        label: 'Tần suất bài thi',
+                        data: bucketValues,
+                        backgroundColor: '#10B981',
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { beginAtZero: true, grid: { color: '#E2E8F0' }, ticks: { precision: 0 } },
+                        x: { grid: { display: false } }
+                    }
+                }
+            });
+
+            buildLmsCourseTable(dfLms);
+        }
+
+        function buildLmsCourseTable(dfLms) {
+            const sumMap = {};
+            dfLms.forEach(row => {
+                let title = row["Tên chương trình"] || "Khác";
+                if (!sumMap[title]) {
+                    sumMap[title] = { count: 0, uniqueStudents: new Set(), passed: 0, scoresSum: 0, scoresCount: 0 };
+                }
+                let cData = sumMap[title];
+                cData.count++;
+                cData.uniqueStudents.add(row["Mã nhân viên"]);
+                if (row["Kết quả nhóm"] === "Đã hoàn thành") cData.passed++;
+                if (row["Score_Numeric"] !== null && row["Score_Numeric"] > 0) {
+                    cData.scoresSum += row["Score_Numeric"];
+                    cData.scoresCount++;
+                }
+            });
+
+            const sortedKeys = Object.keys(sumMap).sort((a,b) => sumMap[b].count - sumMap[a].count);
+            const tbody = document.getElementById('lms-course-tbody');
+            
+            if (sortedKeys.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-slate-400 italic">Không tìm thấy bản ghi đào tạo LMS phù hợp bộ lọc.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = sortedKeys.map(key => {
+                let stats = sumMap[key];
+                let compRate = stats.count > 0 ? (stats.passed / stats.count * 100).toFixed(1) : "0.0";
+                let scoreAvg = stats.scoresCount > 0 ? (stats.scoresSum / stats.scoresCount).toFixed(1) : "N/A (Chuyên cần)";
+
+                return `
+                    <tr class="hover:bg-slate-50 transition border-b border-slate-100">
+                        <td class="p-4 pl-6 font-bold text-slate-800">${key}</td>
+                        <td class="p-4 text-center text-slate-500 font-semibold">${stats.count} lượt</td>
+                        <td class="p-4 text-center text-slate-500 font-semibold">${stats.uniqueStudents.size} học viên</td>
+                        <td class="p-4 text-center text-emerald-600 font-bold">${compRate}%</td>
+                        <td class="p-4 text-right pr-6 font-extrabold text-brand-navy">${scoreAvg}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function calculateAndRenderTab3() {
+            const onboardData = appState.filteredData.filter(row => row["Is_Onboard_Participant"]);
+            const onboardIds = [...new Set(onboardData.map(r => r["Mã nhân viên"]))];
+            
+            const activeOnboardHistory = appState.rawData.filter(row => onboardIds.includes(row["Mã nhân viên"]));
+            
+            const empDeptMap = {};
+            activeOnboardHistory.forEach(row => {
+                empDeptMap[row["Mã nhân viên"]] = row["Phòng ban"] || "Khác";
+            });
+
+            const tsSteps = [
+                /hội nhập/i,
+                /sản phẩm/i,
+                /coc - crm/i,
+                /call script|làm chủ cuộc gọi/i
+            ];
+
+            const dsSteps = [
+                /hội nhập/i,
+                /sản phẩm/i,
+                /coc - crm/i,
+                /kỹ năng ds|bán hàng trực tiếp/i
+            ];
+
+            const empCompletedSteps = {};
+            onboardIds.forEach(id => {
+                empCompletedSteps[id] = new Set();
+            });
+
+            activeOnboardHistory.forEach(row => {
+                const id = row["Mã nhân viên"];
+                const course = row["Tên chương trình"] || "";
+                const isPassed = row["Kết quả nhóm"] === "Đã hoàn thành";
+                const dept = empDeptMap[id] || "";
+                const isTS = dept.toUpperCase().startsWith("TS");
+                const isDS = dept.toUpperCase().startsWith("DS");
+
+                if (isPassed && empCompletedSteps[id]) {
+                    const steps = isTS ? tsSteps : (isDS ? dsSteps : []);
+                    steps.forEach((pattern, index) => {
+                        if (pattern.test(course)) {
+                            empCompletedSteps[id].add(index);
+                        }
+                    });
+                }
+            });
+
+            const deptTSData = {}; 
+            const deptDSData = {};
+
+            onboardIds.forEach(id => {
+                const dept = empDeptMap[id];
+                if (!dept) return;
+                
+                const isTS = dept.toUpperCase().startsWith("TS");
+                const isDS = dept.toUpperCase().startsWith("DS");
+                if (!isTS && !isDS) return;
+
+                const completedCount = empCompletedSteps[id].size;
+                const score = (completedCount / 4) * 100; 
+
+                if (isTS) {
+                    if (!deptTSData[dept]) deptTSData[dept] = { total: 0, count: 0 };
+                    deptTSData[dept].total += score;
+                    deptTSData[dept].count++;
+                } else if (isDS) {
+                    if (!deptDSData[dept]) deptDSData[dept] = { total: 0, count: 0 };
+                    deptDSData[dept].total += score;
+                    deptDSData[dept].count++;
+                }
+            });
+
+            // TS Chart Rates
+            const tsLabels = [];
+            const tsRates = [];
+            Object.keys(deptTSData).forEach(dept => {
+                const avg = deptTSData[dept].total / deptTSData[dept].count;
+                tsLabels.push(dept);
+                tsRates.push(parseFloat(avg.toFixed(1)));
+            });
+            const tsIndices = tsLabels.map((_, i) => i);
+            tsIndices.sort((a, b) => tsRates[b] - tsRates[a]);
+            const sortedTsLabels = tsIndices.map(i => tsLabels[i]);
+            const sortedTsRates = tsIndices.map(i => tsRates[i]);
+
+            // DS Chart Rates
+            const dsLabels = [];
+            const dsRates = [];
+            Object.keys(deptDSData).forEach(dept => {
+                const avg = deptDSData[dept].total / deptDSData[dept].count;
+                dsLabels.push(dept);
+                dsRates.push(parseFloat(avg.toFixed(1)));
+            });
+            const dsIndices = dsLabels.map((_, i) => i);
+            dsIndices.sort((a, b) => dsRates[b] - dsRates[a]);
+            const sortedDsLabels = dsIndices.map(i => dsLabels[i]);
+            const sortedDsRates = dsIndices.map(i => dsRates[i]);
+
+            // Render TS Chart
+            cleanupChart('tsRoadmap');
+            const ctxTS = document.getElementById('chart-ts-roadmap').getContext('2d');
+            appState.charts.tsRoadmap = new Chart(ctxTS, {
+                type: 'bar',
+                data: {
+                    labels: sortedTsLabels.length > 0 ? sortedTsLabels : ["Không có dữ liệu"],
+                    datasets: [{
+                        label: 'Tỷ lệ hoàn thành lộ trình (%)',
+                        data: sortedTsRates.length > 0 ? sortedTsRates : [0],
+                        backgroundColor: '#F59E0B',
+                        borderRadius: 5,
+                        maxBarThickness: 32
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { 
+                        legend: { display: false },
+                        tooltip: { callbacks: { label: (ctx) => `${ctx.raw}%` } }
+                    },
+                    scales: {
+                        x: { beginAtZero: true, max: 100, grid: { color: '#E2E8F0' }, ticks: { callback: (val) => `${val}%` } },
+                        y: { grid: { display: false } }
+                    }
+                }
+            });
+
+            // Render DS Chart
+            cleanupChart('dsRoadmap');
+            const ctxDS = document.getElementById('chart-ds-roadmap').getContext('2d');
+            appState.charts.dsRoadmap = new Chart(ctxDS, {
+                type: 'bar',
+                data: {
+                    labels: sortedDsLabels.length > 0 ? sortedDsLabels : ["Không có dữ liệu"],
+                    datasets: [{
+                        label: 'Tỷ lệ hoàn thành lộ trình (%)',
+                        data: sortedDsRates.length > 0 ? sortedDsRates : [0],
+                        backgroundColor: '#10B981',
+                        borderRadius: 5,
+                        maxBarThickness: 32
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { 
+                        legend: { display: false },
+                        tooltip: { callbacks: { label: (ctx) => `${ctx.raw}%` } }
+                    },
+                    scales: {
+                        x: { beginAtZero: true, max: 100, grid: { color: '#E2E8F0' }, ticks: { callback: (val) => `${val}%` } },
+                        y: { grid: { display: false } }
+                    }
+                }
+            });
+        }
+
+        function calculateAndRenderTab4() {
+            const totalSessions = appState.filteredData.length;
+            
+            // 1. Số lượng training nội bộ (lớp học do giảng viên thuộc nhóm: Nội bộ, SM, Nguyên Hạo đứng lớp)
+            const internalTrainingRows = appState.filteredData.filter(row => {
+                // Phải là hình thức học trực tiếp và có tên giảng viên hợp lệ (không phải LMS/E-learning)
+                return !row.Is_LMS && row["Giảng viên"] && row["Hình thức Giảng viên"] !== "E-Learning (LMS)";
+            });
+
+            const uniqueInternalClassesCount = [...new Set(internalTrainingRows.map(r => r["Mã lớp"]).filter(Boolean))].length;
+            const totalInternalSessions = internalTrainingRows.length;
+
+            // 2. Số lượng giảng viên đào tạo (tên người đứng lớp: Thu Phương, Nhật Vi, Hoàng Sơn, Linh Trang, Nguyên Hạo...)
+            const uniqueTrainerNames = [...new Set(internalTrainingRows.map(r => r["Giảng viên"]).filter(Boolean))];
+            const trainersCount = uniqueTrainerNames.length;
+
+            // 3. Số lượng học qua LMS (hình thức E-Learning)
+            const lmsRows = appState.filteredData.filter(r => r.Is_LMS);
+            const lmsCount = lmsRows.length;
+
+            // 4. Tỉ lệ phân bổ lượt học: Giảng dạy trực tiếp (Instructor-Led) vs LMS (E-Learning)
+            const directRatio = totalSessions > 0 ? (totalInternalSessions / totalSessions * 100) : 0;
+            const lmsRatio = totalSessions > 0 ? (lmsCount / totalSessions * 100) : 0;
+
+            document.getElementById('trainer-kpi-internal-count').innerText = `${uniqueInternalClassesCount} lớp (${totalInternalSessions} lượt)`;
+            document.getElementById('trainer-kpi-direct-classes').innerText = `${trainersCount} giảng viên`;
+            document.getElementById('trainer-kpi-lms-learners').innerText = `${lmsCount.toLocaleString('vi-VN')} lượt`;
+            document.getElementById('trainer-kpi-lms-ratio').innerText = `${directRatio.toFixed(1)}% vs ${lmsRatio.toFixed(1)}%`;
+
+            // Aggregating statistics per Instructor / LMS system
+            const trainerStats = {};
+            appState.filteredData.forEach(row => {
+                let trainer = row["Giảng viên"] || "Chưa xác định";
+                if (!trainerStats[trainer]) {
+                    trainerStats[trainer] = {
+                        name: trainer,
+                        isLms: row.Is_LMS,
+                        formType: row["Hình thức Giảng viên"],
+                        courses: new Set(),
+                        classes: new Set(),
+                        totalTrainees: 0,
+                        passed: 0,
+                        scoreSum: 0,
+                        scoreCount: 0
+                    };
+                }
+                let ts = trainerStats[trainer];
+                if (row["Tên chương trình"]) ts.courses.add(row["Tên chương trình"]);
+                if (row["Mã lớp"]) ts.classes.add(row["Mã lớp"]);
+                ts.totalTrainees++;
+                if (row["Kết quả nhóm"] === "Đã hoàn thành") ts.passed++;
+                if (row["Score_Numeric"] !== null && row["Score_Numeric"] > 0) {
+                    ts.scoreSum += row["Score_Numeric"];
+                    ts.scoreCount++;
+                }
+            });
+
+            const trainersDataList = Object.values(trainerStats);
+
+            // Chart: Top Giảng viên đứng dạy nhiều lớp nhất
+            cleanupChart('trainerTopClasses');
+            const internalTrainersData = trainersDataList.filter(t => !t.isLms).sort((a,b) => b.classes.size - a.classes.size);
+            const chartLabels = internalTrainersData.slice(0, 8).map(t => t.name);
+            const chartValues = internalTrainersData.slice(0, 8).map(t => t.classes.size);
+
+            const ctxTrainer = document.getElementById('chart-trainer-top-classes').getContext('2d');
+            appState.charts.trainerTopClasses = new Chart(ctxTrainer, {
+                type: 'bar',
+                data: {
+                    labels: chartLabels.length > 0 ? chartLabels : ["Chưa có dữ liệu"],
+                    datasets: [{
+                        label: 'Số lớp học đứng dạy',
+                        data: chartValues.length > 0 ? chartValues : [0],
+                        backgroundColor: '#1E3E7C',
+                        borderRadius: 4,
+                        maxBarThickness: 35
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { beginAtZero: true, grid: { color: '#E2E8F0' }, ticks: { stepSize: 1, precision: 0 } },
+                        x: { grid: { display: false } }
+                    }
+                }
+            });
+
+            // Chart: Phân bổ hình thức giảng dạy trực tiếp (Nội bộ / SM / Nguyên Hạo)
+            cleanupChart('trainerModulePie');
+            const formCounts = { "Nội bộ": 0, "SM": 0, "Nguyên Hạo": 0 };
+            internalTrainingRows.forEach(row => {
+                let form = row["Hình thức Giảng viên"];
+                if (formCounts.hasOwnProperty(form)) {
+                    formCounts[form]++;
+                }
+            });
+
+            const moduleLabels = Object.keys(formCounts);
+            const moduleValues = Object.values(formCounts);
+
+            const ctxMod = document.getElementById('chart-trainer-module-pie').getContext('2d');
+            appState.charts.trainerModulePie = new Chart(ctxMod, {
+                type: 'pie',
+                data: {
+                    labels: moduleLabels,
+                    datasets: [{
+                        data: moduleValues,
+                        backgroundColor: ['#1E3E7C', '#F59E0B', '#10B981'],
+                        borderWidth: 1.5
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: { boxWidth: 12, font: { size: 10 } }
+                        }
+                    }
+                }
+            });
+
+            // Build Trainer Summary Table
+            const tbody = document.getElementById('trainer-summary-tbody');
+            if (trainersDataList.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" class="p-4 text-center text-slate-400 italic">Không có dữ liệu giảng viên phù hợp bộ lọc.</td></tr>`;
+                return;
+            }
+
+            // Sort list by total trainee count descending
+            trainersDataList.sort((a,b) => b.totalTrainees - a.totalTrainees);
+
+            tbody.innerHTML = trainersDataList.map(t => {
+                let badgeColor = "bg-slate-50 text-slate-700 border-slate-200";
+                if (t.formType === "E-Learning (LMS)") {
+                    badgeColor = "bg-indigo-50 text-indigo-700 border-indigo-100";
+                } else if (t.formType === "SM") {
+                    badgeColor = "bg-amber-50 text-amber-700 border-amber-100";
+                } else if (t.formType === "Nguyên Hạo") {
+                    badgeColor = "bg-teal-50 text-teal-700 border-teal-100";
+                } else if (t.formType === "Nội bộ") {
+                    badgeColor = "bg-emerald-50 text-emerald-700 border-emerald-100";
+                }
+
+                let typeBadge = `<span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold ${badgeColor} border">${t.formType}</span>`;
+                
+                let avgScore = t.scoreCount > 0 ? (t.scoreSum / t.scoreCount).toFixed(1) : "N/A (Chuyên cần)";
+                let passRate = t.totalTrainees > 0 ? (t.passed / t.totalTrainees * 100).toFixed(1) : "0.0";
+
+                return `
+                    <tr class="hover:bg-slate-50 transition border-b border-slate-100">
+                        <td class="p-3 pl-6 font-bold text-slate-800">${t.name}</td>
+                        <td class="p-3 text-center">${typeBadge}</td>
+                        <td class="p-3 text-center font-semibold text-slate-600">${t.courses.size} khóa</td>
+                        <td class="p-3 text-center font-semibold text-slate-600">${t.classes.size} lớp</td>
+                        <td class="p-3 text-center font-bold text-brand-navy">${t.totalTrainees.toLocaleString('vi-VN')} lượt</td>
+                        <td class="p-3 text-center font-bold text-emerald-600">${passRate}%</td>
+                        <td class="p-3 text-right pr-6 font-extrabold text-amber-600">${avgScore}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function executeLookup() {
+            const inputVal = document.getElementById('lookup-input').value.trim().toUpperCase();
+            const resultBox = document.getElementById('lookup-result');
+            const notFoundBox = document.getElementById('lookup-not-found');
+
+            if (!inputVal) {
+                resultBox.classList.add('hidden');
+                notFoundBox.classList.add('hidden');
+                return;
+            }
+
+            const matchedRecords = appState.rawData.filter(row => String(row["Mã nhân viên"]).trim().toUpperCase() === inputVal);
+
+            if (matchedRecords.length === 0) {
+                resultBox.classList.add('hidden');
+                notFoundBox.classList.remove('hidden');
+                return;
+            }
+
+            notFoundBox.classList.add('hidden');
+            resultBox.classList.remove('hidden');
+
+            const ref = matchedRecords[0];
+            const studentName = ref["Họ tên"] || "Chưa cập nhật";
+            const studentCode = ref["Mã nhân viên"] || "--";
+            const studentDept = ref["Phòng ban"] || "--";
+            const studentGroup = ref["Nhóm Bộ Phận"] || "Khác";
+            const rawStatus = ref["Trạng thái làm việc"] || ref["Nhóm trạng thái"] || "--";
+
+            document.getElementById('lookup-name').innerText = studentName;
+            document.getElementById('lookup-code').innerText = `Mã NV: ${studentCode}`;
+            document.getElementById('lookup-dept').innerText = studentDept;
+            document.getElementById('lookup-group').innerText = studentGroup;
+
+            const statusNode = document.getElementById('lookup-status');
+            statusNode.innerText = rawStatus;
+            if (rawStatus.toLowerCase().includes("nghỉ")) {
+                statusNode.className = "font-bold text-brand-rose bg-rose-50 px-2 py-0.5 rounded";
+            } else {
+                statusNode.className = "font-bold text-brand-emerald bg-emerald-50 px-2 py-0.5 rounded";
+            }
+
+            const splitName = studentName.split(" ");
+            const initials = splitName.slice(-2).map(n => n[0]).join("").toUpperCase();
+            document.getElementById('lookup-avatar').innerText = initials || "--";
+
+            const lookupTableBody = document.getElementById('lookup-tbody');
+            
+            matchedRecords.sort((a,b) => {
+                let dateA = new Date(a["Ngày tổ chức"] || a["Ngay to chuc"] || 0);
+                let dateB = new Date(b["Ngày tổ chức"] || b["Ngay to chuc"] || 0);
+                return dateA - dateB;
+            });
+
+            lookupTableBody.innerHTML = matchedRecords.map(row => {
+                let rawRes = row["Kết quả"] || "--";
+                let resGroup = row["Kết quả nhóm"];
+                let scoreText = row["Điểm"] || "--";
+
+                let textClass = "bg-slate-50 text-slate-500 border border-slate-200";
+                if (resGroup === "Đã hoàn thành") {
+                    textClass = "bg-emerald-50 text-emerald-700 border border-emerald-100";
+                } else if (resGroup === "Thi trượt / Chưa đạt") {
+                    textClass = "bg-rose-50 text-rose-700 border border-rose-100";
+                } else if (resGroup === "Nghỉ việc trong đào tạo") {
+                    textClass = "bg-red-50 text-red-700 border border-red-200";
+                }
+
+                return `
+                    <tr class="hover:bg-slate-50/50 transition border-b border-slate-100">
+                        <td class="p-3 pl-4 font-semibold text-slate-500">${row["Ngày tổ chức"] || row["Ngay to chuc"] || "--"}</td>
+                        <td class="p-3 font-bold text-slate-800">${row["Tên chương trình"] || "--"}</td>
+                        <td class="p-3 text-center text-slate-600 font-extrabold">${scoreText}</td>
+                        <td class="p-3 text-center text-slate-500 font-semibold">${rawRes}</td>
+                        <td class="p-3 text-center">
+                            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold ${textClass}">
+                                ${resGroup}
+                            </span>
+                        </td>
+                        <td class="p-3 text-slate-600">${row["Giảng viên"] || "--"}</td>
+                        <td class="p-3 pr-4 text-slate-500">${row["Hình thức ĐT"]}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+    </script>
+</body>
+</html>
