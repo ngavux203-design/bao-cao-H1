@@ -9,9 +9,26 @@
     <!-- Nhúng thư viện biểu đồ tương tác Plotly.js -->
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 </head>
-<body class="bg-slate-50 text-slate-800 p-4 sm:p-6">
+<body class="bg-slate-50 text-slate-800">
 
-    <div class="max-w-7xl mx-auto">
+    <!-- THANH ĐIỀU HƯỚNG HỆ THỐNG BÁO CÁO -->
+    <div class="bg-slate-900 text-white py-3 px-4 sm:px-6 shadow-md flex flex-col sm:flex-row justify-between items-center gap-3 text-xs md:text-sm">
+        <div class="flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-blue-500 animate-pulse"></span>
+            <span class="font-bold tracking-wide text-slate-200 uppercase">Hệ Thống Phân Tích Đào Tạo KiotViet</span>
+        </div>
+        <div class="flex gap-2 bg-slate-800 p-1 rounded-lg">
+            <a href="index.html" class="px-3 py-1.5 rounded-md bg-blue-800 text-white font-semibold transition">
+                📈 Kiểu 1: Báo cáo Tĩnh
+            </a>
+            <a href="index-2.html" class="px-3 py-1.5 rounded-md hover:text-white text-slate-300 font-medium transition">
+                💻 Kiểu 2: Dashboard Tương tác CSV
+            </a>
+        </div>
+    </div>
+
+    <!-- NỘI DUNG CHÍNH -->
+    <div class="max-w-7xl mx-auto p-4 sm:p-6">
         <!-- TIÊU ĐỀ CHÍNH -->
         <div class="bg-white rounded-xl p-6 shadow-sm border border-slate-200 mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
